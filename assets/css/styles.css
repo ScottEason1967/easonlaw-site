@@ -67,7 +67,7 @@ a:hover{color:var(--red-dark);}
 section{padding:60px 0;}
 .section-alt{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
 .lead-head{max-width:34ch;}
-.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:54px;align-items:start;}
+.two-col{display:grid;grid-template-columns:minmax(180px,.66fr) 1.34fr;gap:48px;align-items:start;}
 .section-head{text-align:center;margin-bottom:34px;}
 .section-head p{color:var(--muted);margin:0;font-size:1rem;}
 
