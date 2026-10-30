@@ -496,6 +496,7 @@ const MENU = {
 const SIDES = ['Smoked Mac & Cheese', 'Charred Tenderstem Broccoli', 'Green Beans', 'Caesar Salad', 'House Salad',
   'Chunky Chips', 'Seasoned Fries', 'Onion Rings', 'Truffle & Parmesan Fries', '2 Tomatoes / 2 Flat Cap Mushrooms'];
 const SAUCES = ['Peppercorn', 'Diane', 'Garlic Butter'];
+const NO_SIDE = 'No side';
 const COOK = ['Blue', 'Rare', 'Medium rare', 'Medium', 'Medium well', 'Well done'];
 const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert'};
 const SRC_NAME = { cf: 'Christmas Fayre', mm: 'Main menu', sv: 'Saver menu', ln: 'Lunch menu' };
@@ -539,7 +540,8 @@ function needsCook(o){ const d = dishOf(o.main); return o.mainType === 'main' &&
 function steakText(o){
   if (!needsCook(o)) return '';
   if (!isSteak(o)) return o.cook || '';
-  return [o.cook, [o.side1, o.side2].filter(Boolean).join(' & ')].filter(Boolean).join(', ');
+  const sides = [o.side1, o.side2].filter(v => v && v !== NO_SIDE);
+  return [o.cook, sides.length ? sides.join(' & ') : (o.side1 && o.side2 ? 'no sides' : '')].filter(Boolean).join(', ');
 }
 function extrasOf(o){
   let sides = listOf(o.extraSides), sauces = listOf(o.sauces);
@@ -773,6 +775,8 @@ function initGuest(){
   fillPlain($('cook'), COOK, 'Choose…');
   fillPlain($('side1'), SIDES, 'Choose a side…');
   fillPlain($('side2'), SIDES, 'Choose a side…');
+  $('side1').add(new Option('No side', NO_SIDE), 1);
+  $('side2').add(new Option('No second side', NO_SIDE), 1);
   fillChecks($('sideChecks'), 'xside', SIDES);
   fillChecks($('sauceChecks'), 'xsauce', SAUCES);
   document.querySelectorAll('input[name=mainType]').forEach(r => r.addEventListener('change', () => { setMainList(); setInvalid('f-mainType', false); renderSummary(); }));
@@ -868,7 +872,7 @@ function renderSheet(isSample){
   const desserts = tally(rows.map((r, i) => isReal(r.dessert) && dishOf(r.dessert) ? kitchenName(r.dessert, ch(i, 'dessert')) : null).filter(Boolean));
   const reqCount = (k, rq) => { const m = {}; rows.forEach((r, i) => { if (r[rq] && isReal(r[k]) && dishOf(r[k])) { const key = kitchenName(r[k], ch(i, k), k === 'main' && r.mainType === 'starter'); m[key] = (m[key] || 0) + 1; } }); return m; };
   const rqS = reqCount('starter', 'starterReq'), rqM = reqCount('main', 'mainReq'), rqD = reqCount('dessert', 'dessertReq');
-  const sides = tally([].concat(...rows.map(r => (isSteak(r) ? [r.side1, r.side2] : []).concat(extrasOf(r).sides).filter(Boolean))));
+  const sides = tally([].concat(...rows.map(r => (isSteak(r) ? [r.side1, r.side2] : []).concat(extrasOf(r).sides).filter(v => v && v !== NO_SIDE))));
   const sauces = tally([].concat(...rows.map(r => extrasOf(r).sauces)));
   const totals = priced.map(p => p ? p.total : 0);
   const grand = totals.reduce((a, b) => a + b, 0);
