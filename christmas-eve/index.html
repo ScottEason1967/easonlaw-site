@@ -823,7 +823,7 @@ let ADMIN_ROWS = [];
 function sampleRows(){
   return [
     {name:'Sample Guest A', starter:'Roasted Celeriac Velouté', mainType:'main', main:'Traditional Roast Turkey', dessert:'Sticky Toffee Pudding', notes:''},
-    {name:'Sample Guest B', starter:'Burrata', mainType:'main', main:'10oz Ribeye Steak', dessert:'Lemon Tiramisu', notes:'', cook:'Medium rare', side1:'Chunky Chips', side2:'Onion Rings', sauces:'Peppercorn'},
+    {name:'Sample Guest B', starter:'Burrata', mainType:'main', main:'10oz Ribeye Steak', dessert:'Lemon Tiramisu', notes:'', cook:'Medium rare', side1:'Chunky Chips', side2:NO_SIDE, sauces:'Peppercorn'},
     {name:'Sample Guest C', starter:NONE.starter, mainType:'starter', main:'Deep Fried Brie', dessert:'Artisan Cheeseboard', notes:'No nuts please'},
     {name:'Sample Guest D', starter:'Soup of the Day', mainType:'main', main:'8oz Bistro Rump Steak with mushroom, tomato & chips', cook:'Medium', dessert:'Sticky Toffee Pudding', notes:''},
     {name:'Sample Guest E', starter:'Garlic Bread with Mozzarella', starterReq:'No mozzarella', mainType:'main', main:'Margherita Pizza', extraSides:'Chunky Chips', dessert:'Knickerbocker Glory', notes:'Gluten free base'}
@@ -876,6 +876,12 @@ function renderSheet(isSample){
   const sauces = tally([].concat(...rows.map(r => extrasOf(r).sauces)));
   const totals = priced.map(p => p ? p.total : 0);
   const grand = totals.reduce((a, b) => a + b, 0);
+  /* spare steak sides: included sides someone chose not to have, which could cover others' paid extra sides */
+  const spare = rows.reduce((a, r) => a + (isSteak(r) ? [r.side1, r.side2].filter(v => v === NO_SIDE).length : 0), 0);
+  const paidSides = rows.reduce((a, r) => a + extrasOf(r).sides.length, 0);
+  const covered = Math.min(spare, paidSides), saving = covered * SIDE_PRICE;
+  const spareWho = rows.filter(r => isSteak(r) && [r.side1, r.side2].includes(NO_SIDE)).map(r => r.name);
+  const paidWho = rows.filter(r => extrasOf(r).sides.length).map(r => r.name + ' (' + extrasOf(r).sides.join(', ') + ')');
   const fayreCount = priced.filter(p => p && Object.values(p.chosen).some(x => x.src === 'cf')).length;
   const remaining = CONFIG.PARTY_SIZE - rows.length;
   const li = (arr, rq) => arr.length ? arr.map(([k, n]) => '<li><span>' + esc(k) +
@@ -900,13 +906,19 @@ function renderSheet(isSample){
         '<td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
         '<td class="p">' + (totals[i] ? money(totals[i]) : '') + '</td></tr>';
     }).join('') : '<tr><td colspan="7">No orders yet.</td></tr>') +
-    '</tbody>' + (rows.length ? '<tfoot><tr><td colspan="6">Total for ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</td><td class="p">' + money(grand) + '</td></tr></tfoot>' : '') +
+    '</tbody>' + (rows.length ? '<tfoot><tr><td colspan="6">Total for ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</td><td class="p">' + money(grand) + '</td></tr>' +
+      (saving ? '<tr><td colspan="6">Total if spare steak sides cover ' + covered + ' of the extra sides (saving ' + money(saving) + ')</td><td class="p">' + money(grand - saving) + '</td></tr>' : '') +
+      '</tfoot>' : '') +
     '</table>' +
     '<div class="totals">' +
       '<div><h3>Starters</h3><ul>' + li(starters, rqS) + '</ul></div>' +
       '<div><h3>Mains</h3><ul>' + li(mains, rqM) + '</ul></div>' +
       '<div><h3>Desserts</h3><ul>' + li(desserts, rqD) + '</ul></div>' +
     '</div>' +
+    (spare ? '<p class="extra"><b>Spare steak sides:</b> ' + spare + ' included side' + (spare === 1 ? '' : 's') + ' not taken (' + esc(spareWho.join(', ')) + '). ' +
+      (paidSides ? paidSides + ' extra side' + (paidSides === 1 ? '' : 's') + ' ordered at ' + money(SIDE_PRICE) + ' (' + esc(paidWho.join('; ')) + '). ' +
+        'If the Vane will let the spare sides cover ' + covered + ' of these, the table saves ' + money(saving) + '.'
+        : 'No extra sides ordered to set them against.') + '</p>' : '') +
     (sides.length || sauces.length ? '<p class="extra"><b>Sides:</b> ' + (sides.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') || 'none') +
       (sauces.length ? ' &nbsp; <b>Sauces:</b> ' + sauces.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') : '') + '</p>' : '') +
     '<p class="extra">Dishes marked <span class="tg mm">Main menu</span> <span class="tg mm">Saver menu</span> or <span class="tg mm">Lunch menu</span> are counted against that menu. Everything else is Christmas Fayre. ' +
