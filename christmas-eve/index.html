@@ -125,6 +125,8 @@
   .summary dd{margin:0}
   .bill{margin-top:12px;border-top:1px dashed #cdbf9e;padding-top:10px;font-size:15px}
   .bill:empty{display:none}
+  .pnote{margin:12px 0 0;padding:10px 12px;border-radius:9px;background:#fff7e0;border:1px solid #e7cf86;color:#5e4a10;font-size:14px;line-height:1.45}
+  .pnote:empty{display:none}
   .bill div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
   .bill .total{margin-top:6px;padding-top:8px;border-top:1px solid #cdbf9e;font-family:var(--display);font-size:22px;font-weight:700;color:var(--pine)}
   button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:12px;padding:14px 18px;min-height:54px;width:100%;
@@ -335,7 +337,7 @@
       <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
       <h2>Thank you, <span id="doneName"></span></h2>
       <p id="doneMsg"></p>
-      <div class="summary"><dl id="doneList"></dl><div class="bill" id="doneBill"></div></div>
+      <div class="summary"><dl id="doneList"></dl><div class="bill" id="doneBill"></div><p class="pnote" id="doneNote"></p></div>
       <p>To change it, send it again with the same name and email.</p>
       <button type="button" class="btn-ghost" id="againBtn">Change my order</button>
     </div>
@@ -387,6 +389,7 @@ const SETS = {
   sv: { label: 'Saver menu', two: 2195, three: 2695 }
 };
 const SIDE_PRICE = 400, SAUCE_PRICE = 300;
+const PRICE_NOTE = "This total is an estimate. We're checking with The Vane Arms how they price the Christmas Fayre and Saver menus, and we'll confirm your final price with you.";
 
 const MENU_IMAGES = {
   fayre: { src: 'menus/christmas-fayre.jpg', title: 'Christmas Fayre menu' },
@@ -657,7 +660,7 @@ function payload(o){
     extraSides: o.extraSides.join(', '), sauces: o.sauces.join(', '),
     menus: p ? ['starter', 'main', 'dessert'].filter(k => p.chosen[k]).map(k => k + ': ' + SRC_NAME[p.chosen[k].src]).join(', ') : '',
     bill: p ? { lines: p.lines, total: p.total } : null,
-    summary: summaryLines(o),
+    summary: summaryLines(o).concat(p ? [['Please note', PRICE_NOTE]] : []),
     website: o.website
   };
 }
@@ -749,6 +752,7 @@ function showDone(o, res){
   $('doneMsg').textContent = msg;
   $('doneList').innerHTML = listHtml(o, false);
   $('doneBill').innerHTML = billHtml(o);
+  $('doneNote').textContent = priceOf(o) ? PRICE_NOTE : '';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 function restore(){
