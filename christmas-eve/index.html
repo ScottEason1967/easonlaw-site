@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0f2a20">
+<title>Christmas Eve at The Vane Arms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0f2a20; --pine:#173d2e; --gold:#d9b45b; --gold-2:#b8913a; --cream:#fbf6ea; --paper:#fffdf7;
+    --berry:#a51f2b; --berry-2:#86141f; --ink:#2a2620; --muted:#6e675a; --line:#e4d8bb;
+    --display:"Playfair Display",Georgia,"Times New Roman",serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;min-height:100vh;color:var(--ink);background:var(--night);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 120% 70% at 50% 0%,#24543f 0%,#123426 55%,#0b2019 100%)}
+  #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:0 16px 56px}
+
+  /* ---------- header ---------- */
+  .lights{position:relative;z-index:1;height:58px;overflow:hidden}
+  .lights svg{display:block;width:100%;height:58px}
+  .bulb{animation:twinkle 2.6s ease-in-out infinite alternate}
+  @keyframes twinkle{0%{opacity:1}55%{opacity:.95}100%{opacity:.35}}
+  header{position:relative;text-align:center;padding:70px 0 8px;color:var(--cream)}
+  .bauble{position:absolute;top:-58px;width:56px;transform-origin:50% 0;animation:sway 5s ease-in-out infinite alternate}
+  .bauble.l{left:-4px}
+  .bauble.r{right:-4px;animation-delay:-2.5s}
+  .bauble.l2{left:48px;width:40px;top:-58px;animation-delay:-1.2s}
+  .bauble.r2{right:50px;width:40px;top:-58px;animation-delay:-3.6s}
+  @keyframes sway{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+  .eyebrow{margin:0 0 4px;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:#e9dfc4}
+  h1{font-family:var(--display);font-weight:700;margin:0;line-height:1;color:var(--gold);
+    font-size:clamp(46px,13vw,72px);text-shadow:0 2px 18px rgba(217,180,91,.25)}
+  .at{font-family:var(--display);font-style:italic;font-weight:500;font-size:clamp(22px,6vw,30px);margin:4px 0 10px;color:var(--cream)}
+  .holly{display:block;margin:6px auto 12px;width:74px;height:30px}
+  .prices{display:inline-block;margin:0;padding:9px 18px;border:1px solid rgba(217,180,91,.7);border-radius:999px;
+    font-size:14.5px;color:var(--cream);background:rgba(0,0,0,.18)}
+  .prices b{color:var(--gold);font-weight:600}
+  .demo{background:#fff7e0;border:1px solid #e7cf86;color:#6a5310;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:14px}
+
+  /* ---------- menus ---------- */
+  .menus{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 0}
+  .menu-card{display:block;width:100%;padding:0;border:1px solid rgba(217,180,91,.65);border-radius:14px;overflow:hidden;
+    background:var(--paper);cursor:pointer;text-align:left;font:inherit;color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.28)}
+  .menu-card img{display:block;width:100%;height:150px;object-fit:cover;object-position:top;border-bottom:1px solid var(--line)}
+  .menu-card span{display:block;padding:9px 12px 10px;font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2}
+  .menu-card small{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .menu-card:hover,.menu-card:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  /* ---------- lightbox ---------- */
+  .lb{position:fixed;inset:0;z-index:50;background:rgba(6,16,11,.94);display:flex;flex-direction:column}
+  .lb[hidden]{display:none}
+  .lb-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;color:var(--cream)}
+  .lb-bar h2{flex:1;margin:0;font-family:var(--display);font-size:18px;color:var(--gold);font-weight:600}
+  .lb-bar button{box-shadow:none;width:auto;min-height:40px;padding:8px 14px;font-size:15px;border-radius:10px;background:transparent;color:var(--cream);border:1px solid rgba(251,246,234,.5)}
+  .lb-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 10px 20px;text-align:center}
+  .lb-scroll img{width:100%;max-width:1000px;height:auto;border-radius:6px;background:#fff;cursor:zoom-in}
+  .lb.zoom .lb-scroll img{width:200%;max-width:none;cursor:zoom-out}
+
+  /* ---------- form ---------- */
+  .card{position:relative;background:var(--paper);border:1px solid var(--gold-2);border-radius:18px;padding:30px 18px 22px;margin-top:30px;
+    box-shadow:0 0 0 5px rgba(217,180,91,.18),0 14px 34px rgba(0,0,0,.35)}
+  .card::before{content:"";position:absolute;inset:6px;border:1px solid var(--line);border-radius:13px;pointer-events:none}
+  .card .sprig{position:absolute;top:-19px;left:50%;transform:translateX(-50%);width:64px;height:36px;background:var(--paper);border-radius:20px;padding:4px 8px;border:1px solid var(--gold-2)}
+  .field{margin:0 0 20px;position:relative}
+  label,.label{display:block;font-family:var(--display);font-weight:600;font-size:18px;margin:0 0 7px;color:var(--pine)}
+  .opt-tag{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-weight:400;font-size:13px;color:var(--muted)}
+  input[type=text],input[type=email],select,textarea{position:relative;
+    width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;
+    border:1px solid #c9bc9b;border-radius:10px;padding:12px;min-height:48px;appearance:none;-webkit-appearance:none}
+  select{background-image:linear-gradient(45deg,transparent 50%,var(--berry) 50%),linear-gradient(135deg,var(--berry) 50%,transparent 50%);
+    background-position:calc(100% - 20px) 21px,calc(100% - 14px) 21px;background-size:6px 6px;background-repeat:no-repeat;padding-right:40px}
+  textarea{min-height:76px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:3px solid rgba(217,180,91,.45);border-color:var(--gold-2)}
+  .desc{margin:7px 2px 0;font-size:14px;color:var(--muted);font-style:italic}
+  .desc:empty{display:none}
+  .choice{display:grid;gap:8px}
+  .opt{display:flex;gap:12px;align-items:center;border:1px solid #d3c7a8;border-radius:10px;padding:12px;cursor:pointer;background:#fff;font-family:inherit;font-size:16px;font-weight:500;color:var(--ink);margin:0}
+  .opt input{margin:0;width:20px;height:20px;accent-color:var(--berry);flex:none}
+  .opt:has(input:checked){border-color:var(--berry);background:#fbf0ee}
+  .error{color:var(--berry);font-size:14px;margin-top:6px;display:none}
+  .invalid .error{display:block}
+  .invalid select,.invalid input,.invalid .opt{border-color:var(--berry)}
+  .summary{background:#f7f1e2;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:4px 0 20px}
+  .summary h2{font-family:var(--display);font-size:19px;margin:0 0 8px;color:var(--berry)}
+  .summary dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+  .summary dt{color:var(--muted)}
+  .summary dd{margin:0}
+  .bill{margin-top:12px;border-top:1px dashed #cdbf9e;padding-top:10px;font-size:15px}
+  .bill:empty{display:none}
+  .bill div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
+  .bill .total{margin-top:6px;padding-top:8px;border-top:1px solid #cdbf9e;font-family:var(--display);font-size:22px;font-weight:700;color:var(--pine)}
+  button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:12px;padding:14px 18px;min-height:54px;width:100%;
+    background:linear-gradient(180deg,#b72634,var(--berry-2));color:var(--cream);cursor:pointer;letter-spacing:.02em;box-shadow:0 3px 0 #5e0d15}
+  button:hover{filter:brightness(1.06)}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  button[disabled]{opacity:.65;cursor:progress}
+  .btn-ghost{background:transparent;color:var(--pine);border:1px solid var(--pine);box-shadow:none}
+  .formerror{display:none;margin:14px 0 0;padding:12px 14px;border-radius:10px;background:#fbeeee;color:var(--berry);font-size:15px}
+  .formerror.show{display:block}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .done h2{font-family:var(--display);color:var(--berry);margin:0 0 8px;font-size:30px;text-align:center}
+  .done p{margin:0 0 12px}
+  .done .summary{margin-top:12px}
+  footer{text-align:center;color:#d8ceb2;font-size:13px;margin-top:22px;letter-spacing:.04em}
+
+  @media (prefers-reduced-motion:reduce){.bauble,.bulb{animation:none}}
+  @media (max-width:420px){.bauble.l2,.bauble.r2{display:none}.menu-card img{height:120px}}
+
+  /* ---------- organiser / print view ---------- */
+  .admin .wrap{max-width:1040px;padding-top:20px}
+  .admin .lights,.admin #snow{display:none}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .toolbar button{width:auto;min-height:44px;padding:10px 16px;font-size:15px}
+  .toolbar .btn-ghost{color:var(--cream);border-color:rgba(251,246,234,.6)}
+  .sheet{background:#fff;border-radius:12px;padding:22px}
+  .sheet h1{font-size:28px;color:var(--pine);margin:0 0 4px;text-align:left;text-shadow:none}
+  .sheet .meta{color:var(--muted);margin:0 0 16px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border:1px solid #cfc6b0;padding:7px 8px;text-align:left;vertical-align:top}
+  th{background:#f3eee2;font-weight:700}
+  td.n{width:34px;text-align:center;color:var(--muted)}
+  td.p,th.p{text-align:right;white-space:nowrap}
+  tfoot td{font-weight:700;background:#f3eee2}
+  .sam{font-size:12px;color:var(--muted)}
+  .alg{color:var(--berry);font-weight:600}
+  .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  .totals h3{font-size:14px;margin:0 0 6px;text-transform:uppercase;letter-spacing:.08em;color:var(--berry)}
+  .totals ul{margin:0;padding:0;list-style:none;font-size:14px}
+  .totals li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dotted #d6d0c2;padding:3px 0}
+  .totals li b{white-space:nowrap}
+  .extra{margin-top:16px;font-size:14px}
+  .missing{margin-top:10px;font-size:14px;color:var(--berry)}
+  @media (max-width:700px){.totals{grid-template-columns:1fr}}
+  @media print{
+    @page{size:A4;margin:12mm}
+    body{background:#fff !important;font-size:12px}
+    #snow,.lights,.no-print,body::before{display:none !important}
+    .admin .wrap{max-width:none;padding:0}
+    .sheet{padding:0;border-radius:0}
+    table{font-size:11px}
+    th,td{padding:4px 6px}
+    tr{page-break-inside:avoid}
+    .totals{grid-template-columns:repeat(3,1fr);break-inside:avoid;page-break-inside:avoid}
+    .totals li{padding:2px 0}
+  }
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" aria-hidden="true"><svg id="lightsSvg" preserveAspectRatio="none"></svg></div>
+
+<div class="wrap" id="app">
+
+  <!-- ===================== GUEST VIEW ===================== -->
+  <div id="guest">
+    <header>
+      <svg class="bauble l" viewBox="0 0 60 130" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="70" stroke="#d9b45b" stroke-width="1.2"/><rect x="24" y="68" width="12" height="9" rx="2" fill="#d9b45b"/><circle cx="30" cy="100" r="24" fill="#a51f2b"/><path d="M8 94q22 10 44 0" stroke="#d9b45b" stroke-width="3" fill="none"/><path d="M7 106q23 10 46 0" stroke="#d9b45b" stroke-width="3" fill="none"/><circle cx="21" cy="91" r="5" fill="#fff" opacity=".35"/></svg>
+      <svg class="bauble l2" viewBox="0 0 60 150" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="96" stroke="#d9b45b" stroke-width="1.2"/><rect x="24" y="94" width="12" height="9" rx="2" fill="#d9b45b"/><circle cx="30" cy="124" r="22" fill="#e9dfc4"/><path d="M30 106l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="#b8913a"/><circle cx="22" cy="115" r="4" fill="#fff" opacity=".6"/></svg>
+      <svg class="bauble r2" viewBox="0 0 60 150" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="90" stroke="#d9b45b" stroke-width="1.2"/><rect x="24" y="88" width="12" height="9" rx="2" fill="#d9b45b"/><circle cx="30" cy="118" r="22" fill="#2f6b4c"/><circle cx="30" cy="118" r="14" fill="none" stroke="#d9b45b" stroke-width="2" stroke-dasharray="3 4"/><circle cx="22" cy="109" r="4" fill="#fff" opacity=".35"/></svg>
+      <svg class="bauble r" viewBox="0 0 60 130" aria-hidden="true"><line x1="30" y1="0" x2="30" y2="62" stroke="#d9b45b" stroke-width="1.2"/><rect x="24" y="60" width="12" height="9" rx="2" fill="#d9b45b"/><circle cx="30" cy="92" r="24" fill="#d9b45b"/><path d="M6 92h48" stroke="#a51f2b" stroke-width="5"/><path d="M10 80h40M10 104h40" stroke="#fff" stroke-width="2" opacity=".55"/><circle cx="21" cy="83" r="5" fill="#fff" opacity=".45"/></svg>
+
+      <p class="eyebrow">Thursday 24 December 2026</p>
+      <h1>Christmas Eve</h1>
+      <p class="at">at The Vane Arms</p>
+      <svg class="holly" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
+      <p class="prices"><b>2 courses £29.95</b> &nbsp;·&nbsp; <b>3 courses £36.95</b> &nbsp;·&nbsp; Wellington &amp; cheeseboard +£3</p>
+      <div class="demo" id="demoBanner" hidden>Preview copy. Nothing here is saved or emailed.</div>
+    </header>
+
+    <div class="menus">
+      <button type="button" class="menu-card" data-menu="fayre">
+        <img src="menus/christmas-fayre.jpg" alt="" loading="eager">
+        <span>Christmas Fayre menu<small>Tap to view</small></span>
+      </button>
+      <button type="button" class="menu-card" data-menu="main">
+        <img src="menus/main-menu.jpg" alt="" loading="lazy">
+        <span>Main menu<small>Tap to view</small></span>
+      </button>
+    </div>
+
+    <form class="card" id="orderForm" novalidate>
+      <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
+
+      <div class="field" id="f-name">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" autocomplete="name" maxlength="80">
+        <div class="error">Please put your name.</div>
+      </div>
+
+      <div class="field" id="f-mainType">
+        <span class="label">For your main course, would you like a main or a starter?</span>
+        <div class="choice" role="radiogroup" aria-label="Main course type">
+          <label class="opt"><input type="radio" name="mainType" value="main">A main course</label>
+          <label class="opt"><input type="radio" name="mainType" value="starter">A starter as my main</label>
+          <label class="opt"><input type="radio" name="mainType" value="none">No main course</label>
+        </div>
+        <div class="error">Please pick one.</div>
+      </div>
+
+      <div class="field" id="f-starter">
+        <label for="starter">Starter</label>
+        <select id="starter" name="starter"></select>
+        <p class="desc" id="d-starter"></p>
+        <div class="error">Please choose a starter, or "No starter".</div>
+      </div>
+
+      <div class="field" id="f-main" hidden>
+        <label for="main" id="mainLabel">Main course</label>
+        <select id="main" name="main"></select>
+        <p class="desc" id="d-main"></p>
+        <div class="error">Please choose your main.</div>
+      </div>
+
+      <div class="field" id="f-dessert">
+        <label for="dessert">Dessert</label>
+        <select id="dessert" name="dessert"></select>
+        <p class="desc" id="d-dessert"></p>
+        <div class="error">Please choose a dessert, or "No dessert".</div>
+      </div>
+
+      <div class="field">
+        <label for="notes">Allergies or dietary needs <span class="opt-tag">(optional)</span></label>
+        <textarea id="notes" name="notes" maxlength="500"></textarea>
+      </div>
+
+      <div class="summary" id="summary" aria-live="polite">
+        <h2>Your order</h2>
+        <dl id="sumList"></dl>
+        <div class="bill" id="sumBill"></div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="email">Your email</label>
+        <input type="email" id="email" name="email" autocomplete="email" inputmode="email" maxlength="120">
+        <div class="error">Please put a valid email address.</div>
+      </div>
+
+      <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
+
+      <div class="field" id="f-any" style="margin-bottom:12px"><div class="error">You haven't picked any food yet.</div></div>
+
+      <button type="submit" id="submitBtn">Send my order</button>
+      <div class="formerror" id="formError" role="alert"></div>
+    </form>
+
+    <div class="card done" id="done" hidden>
+      <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
+      <h2>Thank you, <span id="doneName"></span></h2>
+      <p id="doneMsg"></p>
+      <div class="summary"><dl id="doneList"></dl><div class="bill" id="doneBill"></div></div>
+      <p>To change it, send it again with the same name and email.</p>
+      <button type="button" class="btn-ghost" id="againBtn">Change my order</button>
+    </div>
+
+    <footer>The Vane Arms · The Village Green · Thorpe Thewles</footer>
+  </div>
+
+  <!-- ===================== ORGANISER VIEW ===================== -->
+  <div id="admin" hidden>
+    <div class="toolbar no-print">
+      <button type="button" id="printBtn">Print</button>
+      <button type="button" class="btn-ghost" id="refreshBtn">Refresh</button>
+      <button type="button" class="btn-ghost" id="csvBtn">Download spreadsheet (CSV)</button>
+    </div>
+    <div class="formerror" id="adminError" role="alert"></div>
+    <div class="sheet" id="sheet"></div>
+  </div>
+</div>
+
+<!-- menu viewer -->
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+  <div class="lb-bar">
+    <h2 id="lbTitle"></h2>
+    <button type="button" id="lbZoom">Zoom</button>
+    <button type="button" id="lbClose" aria-label="Close menu">Close</button>
+  </div>
+  <div class="lb-scroll" id="lbScroll"><img id="lbImg" alt=""></div>
+</div>
+
+<script>
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+const CONFIG = {
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwUS44SCN-Toj6OXsVWe3MUc-dPOw905pE6YJq2veUZwV2UM3e7Ip_0jKrQEDuulqDq/exec',
+  PARTY_SIZE: 19,
+  EVENT: 'Christmas Eve at The Vane Arms',
+  WHEN: 'Thursday 24 December 2026',
+  ORGANISER: 'Scott Eason'
+};
+/* Prices in pence. A single course is charged at the 2-course price. */
+const PRICES = { TWO: 2995, THREE: 3695 };
+
+const MENU_IMAGES = {
+  fayre: { src: 'menus/christmas-fayre.jpg', title: 'Christmas Fayre menu' },
+  main:  { src: 'menus/main-menu.jpg', title: 'Main menu' }
+};
+
+/* Christmas Fayre menu, as printed by The Vane Arms */
+const MENU = {
+  starters: [
+    {name:'Roasted Celeriac Velouté', desc:'Truffle & thyme croutons & sliced bloomer bread'},
+    {name:'Smoked Salmon, Atlantic Prawn & Crayfish Cocktail', desc:'Roe caviar, shredded baby gem, buttered brown bread'},
+    {name:'Chicken Liver Parfait', desc:'Caramelised red onion & cranberry chutney, toasted brioche bread'},
+    {name:'Sautéed Wild Mushroom & Spinach Soufflé', desc:'Truffle & parmesan cream reduction'},
+    {name:'Deep Fried Brie', desc:'Rocket and parmesan salad, redcurrant jelly & toasted brioche'}
+  ],
+  mains: [
+    {name:'Traditional Roast Turkey', desc:'Turkey leg & cranberry ballotine, pigs in blankets, Yorkshire pudding & all the trimmings'},
+    {name:'Fillet of Beef Wellington', supp:300, short:'Beef Wellington', desc:'Spinach, wild mushroom duxelles, Parma ham, glazed orange and cardamom carrots, creamed mash, braised hispi & port wine jus'},
+    {name:'Confit Duck Leg', desc:'Braised red cabbage, Puy lentil cassoulet & tenderstem broccoli'},
+    {name:'Oven Roast Cod', desc:'Wild mushrooms, spinach, samphire, ratte potato mousse, brown shrimp, mustard mayo, panko crumb & pickled cucumbers'},
+    {name:'Roasted Cauliflower & Caramelised Onion Gnocchi', desc:'Served in a rich crème fraîche sauce & herb infused panko crumb'}
+  ],
+  desserts: [
+    {name:'Sticky Toffee Pudding', desc:'Butterscotch sauce & vanilla pod ice cream'},
+    {name:'Double Chocolate Brownie', desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
+    {name:'Traditional Christmas Pudding', desc:'Brandy sauce & redcurrants'},
+    {name:'Espresso Crème Brûlée', desc:'Homemade shortbread'},
+    {name:'Artisan Cheeseboard', supp:300, short:'Cheeseboard', desc:'Brie, cheddar, Yorkshire blue, selection of biscuits, chutney, grapes & celery'},
+    {name:'Spiced Poached Pear Cheesecake', desc:'Vanilla pod ice cream'}
+  ]
+};
+const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert'};
+
+const $ = id => document.getElementById(id);
+const LIVE = /^https:\/\/script\.google\.com\//.test(CONFIG.SCRIPT_URL);
+const byName = {};
+[...MENU.starters, ...MENU.mains, ...MENU.desserts].forEach(d => byName[d.name] = d);
+const label = d => d.name + (d.supp ? ' (+£' + (d.supp / 100) + ')' : '');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = p => '£' + (p / 100).toFixed(2);
+const isReal = v => !!v && !Object.values(NONE).includes(v);
+
+/* ---------------- pricing ---------------- */
+function courseCount(o){ return [o.starter, o.main, o.dessert].filter(isReal).length; }
+function priceOf(o){
+  const n = courseCount(o);
+  if (!n) return null;
+  const lines = [];
+  const base = n >= 3 ? PRICES.THREE : PRICES.TWO;
+  lines.push([n === 1 ? '1 course (2-course price)' : n + ' courses', base]);
+  const mainDish = o.mainType === 'main' ? byName[o.main] : null;
+  if (mainDish && mainDish.supp) lines.push([mainDish.short + ' supplement', mainDish.supp]);
+  const d = byName[o.dessert];
+  if (d && d.supp) lines.push([d.short + ' supplement', d.supp]);
+  return { lines, total: lines.reduce((a, l) => a + l[1], 0) };
+}
+function billHtml(o){
+  const p = priceOf(o);
+  if (!p) return '';
+  return p.lines.map(([k, v]) => '<div><span>' + esc(k) + '</span><span>' + money(v) + '</span></div>').join('')
+    + '<div class="total"><span>Your total</span><span>' + money(p.total) + '</span></div>';
+}
+
+/* ---------------- guest form ---------------- */
+function fillSelect(sel, items, placeholder, noneText){
+  sel.innerHTML = '';
+  const ph = new Option(placeholder, ''); ph.disabled = true; ph.selected = true; sel.add(ph);
+  if (noneText) sel.add(new Option(noneText, noneText));
+  items.forEach(d => sel.add(new Option(label(d), d.name)));
+}
+function mainType(){ const r = document.querySelector('input[name=mainType]:checked'); return r ? r.value : ''; }
+function setMainList(){
+  const t = mainType(), sel = $('main'), keep = sel.value;
+  $('f-main').hidden = !(t === 'main' || t === 'starter');
+  if (t === 'main'){ $('mainLabel').textContent = 'Main course'; fillSelect(sel, MENU.mains, 'Choose your main…'); }
+  if (t === 'starter'){ $('mainLabel').textContent = 'Your main (from the starters)'; fillSelect(sel, MENU.starters, 'Choose a starter as your main…'); }
+  if ([...sel.options].some(o => o.value === keep && keep)) sel.value = keep;
+  showDesc('main');
+}
+function showDesc(k){ const d = byName[$(k).value]; $('d-' + k).textContent = d ? d.desc : ''; }
+function currentOrder(){
+  const t = mainType();
+  return {
+    name: $('name').value.trim(), email: $('email').value.trim(), mainType: t,
+    starter: $('starter').value, main: t === 'none' ? NONE.main : $('main').value,
+    dessert: $('dessert').value, notes: $('notes').value.trim(), website: $('website').value
+  };
+}
+function mainText(o){
+  if (!isReal(o.main)) return o.main || '';
+  return o.mainType === 'starter' ? o.main + ' (starter as main)' : o.main;
+}
+function listHtml(o, showEmpty){
+  const rows = [['Starter', o.starter], ['Main', o.mainType ? mainText(o) : ''], ['Dessert', o.dessert]];
+  if (o.notes) rows.push(['Notes', o.notes]);
+  return rows.map(([k, v]) => '<dt>' + k + '</dt><dd>' + (v ? esc(v) : (showEmpty ? '<span style="color:#a39c8c">not chosen yet</span>' : '')) + '</dd>').join('');
+}
+function renderSummary(){
+  const o = currentOrder();
+  $('sumList').innerHTML = listHtml(o, true);
+  $('sumBill').innerHTML = billHtml(o);
+}
+function setInvalid(id, bad){ $(id).classList.toggle('invalid', !!bad); return !bad; }
+function validate(o){
+  let ok = true, first = null;
+  const check = (id, bad) => { if (!setInvalid(id, bad)) { ok = false; first = first || id; } };
+  check('f-name', !o.name);
+  check('f-mainType', !o.mainType);
+  check('f-starter', !o.starter);
+  check('f-main', (o.mainType === 'main' || o.mainType === 'starter') && !o.main);
+  check('f-dessert', !o.dessert);
+  check('f-email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(o.email));
+  const complete = o.mainType && o.starter && o.dessert && (o.mainType === 'none' || o.main);
+  check('f-any', complete && courseCount(o) === 0);
+  if (first) $(first).scrollIntoView({behavior:'smooth', block:'center'});
+  return ok;
+}
+async function submit(e){
+  e.preventDefault();
+  $('formError').classList.remove('show');
+  const o = currentOrder();
+  if (!validate(o)) return;
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    let res;
+    if (LIVE){
+      const r = await fetch(CONFIG.SCRIPT_URL, {method:'POST', body: JSON.stringify(Object.assign({action:'submit'}, o))});
+      res = await r.json();
+    } else {
+      await new Promise(r => setTimeout(r, 500));
+      res = {ok:true, updated:false, mailed:true, preview:true};
+    }
+    if (!res.ok) throw new Error(res.error || 'Something went wrong.');
+    try { localStorage.setItem('xmasOrder', JSON.stringify(o)); } catch(_) {}
+    showDone(o, res);
+  } catch(err){
+    const f = $('formError');
+    f.textContent = (err && err.message && !/Failed to fetch|NetworkError|JSON|Load failed/.test(err.message)) ? err.message
+      : "Your order didn't go through. Check your signal and press Send again.";
+    f.classList.add('show');
+  } finally { btn.disabled = false; btn.textContent = 'Send my order'; }
+}
+function showDone(o, res){
+  $('orderForm').hidden = true; $('done').hidden = false;
+  $('doneName').textContent = o.name.split(' ')[0] || o.name;
+  let msg = res.updated ? 'Your order has been updated.' : "Your order's in.";
+  if (res.preview) msg += ' (Preview: nothing was saved or emailed.)';
+  else if (res.mailed === false) msg += " The confirmation email didn't send, but your order is saved.";
+  else msg += ' A copy is on its way to ' + o.email + '.';
+  $('doneMsg').textContent = msg;
+  $('doneList').innerHTML = listHtml(o, false);
+  $('doneBill').innerHTML = billHtml(o);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function restore(){
+  let o; try { o = JSON.parse(localStorage.getItem('xmasOrder') || 'null'); } catch(_) {}
+  if (!o) return;
+  $('name').value = o.name || ''; $('email').value = o.email || ''; $('notes').value = o.notes || '';
+  const r = document.querySelector('input[name=mainType][value="' + o.mainType + '"]'); if (r) r.checked = true;
+  setMainList();
+  ['starter', 'dessert'].forEach(k => { if (o[k]) $(k).value = o[k]; showDesc(k); });
+  if (o.main && o.mainType !== 'none') { $('main').value = o.main; showDesc('main'); }
+}
+function initGuest(){
+  if (!LIVE) $('demoBanner').hidden = false;
+  fillSelect($('starter'), MENU.starters, 'Choose a starter…', NONE.starter);
+  fillSelect($('dessert'), MENU.desserts, 'Choose a dessert…', NONE.dessert);
+  document.querySelectorAll('input[name=mainType]').forEach(r => r.addEventListener('change', () => { setMainList(); setInvalid('f-mainType', false); renderSummary(); }));
+  ['starter', 'main', 'dessert'].forEach(k => $(k).addEventListener('change', () => { showDesc(k); setInvalid('f-' + k, false); setInvalid('f-any', false); renderSummary(); }));
+  ['name', 'email'].forEach(k => $(k).addEventListener('input', () => { setInvalid('f-' + k, false); renderSummary(); }));
+  $('notes').addEventListener('input', renderSummary);
+  $('orderForm').addEventListener('submit', submit);
+  $('againBtn').addEventListener('click', () => { $('done').hidden = true; $('orderForm').hidden = false; restore(); renderSummary(); window.scrollTo({top:0}); });
+  document.querySelectorAll('.menu-card').forEach(b => b.addEventListener('click', () => openMenu(b.dataset.menu, b)));
+  restore();
+  renderSummary();
+}
+
+/* ---------------- menu viewer ---------------- */
+let lbReturn = null;
+function openMenu(key, from){
+  const m = MENU_IMAGES[key]; if (!m) return;
+  lbReturn = from || null;
+  $('lbTitle').textContent = m.title;
+  $('lbImg').src = m.src; $('lbImg').alt = m.title;
+  $('lb').classList.remove('zoom'); $('lbZoom').textContent = 'Zoom';
+  $('lb').hidden = false; document.body.style.overflow = 'hidden';
+  $('lbScroll').scrollTop = 0; $('lbClose').focus();
+}
+function closeMenu(){
+  $('lb').hidden = true; document.body.style.overflow = '';
+  if (lbReturn) lbReturn.focus();
+}
+function toggleZoom(){
+  const z = $('lb').classList.toggle('zoom');
+  $('lbZoom').textContent = z ? 'Fit' : 'Zoom';
+}
+$('lbClose').addEventListener('click', closeMenu);
+$('lbZoom').addEventListener('click', toggleZoom);
+$('lbImg').addEventListener('click', toggleZoom);
+$('lb').addEventListener('click', e => { if (e.target === $('lb') || e.target === $('lbScroll')) closeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('lb').hidden) closeMenu(); });
+
+/* ---------------- organiser / print view ---------------- */
+let ADMIN_ROWS = [];
+function sampleRows(){
+  const s = MENU.starters, m = MENU.mains, d = MENU.desserts;
+  const picks = [
+    [s[0].name,'main',m[0].name,d[0].name,''],
+    [s[2].name,'main',m[1].name,d[2].name,''],
+    [NONE.starter,'starter',s[4].name,d[4].name,'No nuts please'],
+    [s[1].name,'main',m[3].name,NONE.dessert,''],
+    [s[3].name,'main',m[4].name,d[1].name,'Vegetarian'],
+    [NONE.starter,'none',NONE.main,d[3].name,'']
+  ];
+  return picks.map((p, i) => ({name:'Sample Guest ' + 'ABCDEF'[i], starter:p[0], mainType:p[1], main:p[2], dessert:p[3], notes:p[4], email:'sample@example.com', updated:''}));
+}
+async function loadAdmin(key){
+  $('adminError').classList.remove('show');
+  $('sheet').innerHTML = '<p>Loading orders…</p>';
+  try {
+    let rows;
+    if (LIVE){
+      const r = await fetch(CONFIG.SCRIPT_URL + '?action=list&key=' + encodeURIComponent(key));
+      const res = await r.json();
+      if (!res.ok) throw new Error(res.error || 'Could not load the orders.');
+      rows = res.orders || [];
+    } else rows = sampleRows();
+    ADMIN_ROWS = rows.slice().sort((a, b) => a.name.localeCompare(b.name, 'en-GB', {sensitivity:'base'}));
+    renderSheet(!LIVE);
+  } catch(err){
+    $('sheet').innerHTML = '';
+    const f = $('adminError'); f.textContent = err.message || 'Could not load the orders.'; f.classList.add('show');
+  }
+}
+function tally(list){
+  const m = new Map(); list.forEach(v => m.set(v, (m.get(v) || 0) + 1));
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+function renderSheet(isSample){
+  const rows = ADMIN_ROWS;
+  const starters = tally(rows.map(r => r.starter).filter(isReal));
+  const mains = tally(rows.filter(r => isReal(r.main)).map(r => r.mainType === 'starter' ? r.main + ' (starter as main)' : r.main));
+  const desserts = tally(rows.map(r => r.dessert).filter(isReal));
+  const courses = tally(rows.map(r => { const n = courseCount(r); return n + (n === 1 ? ' course' : ' courses'); }));
+  const welly = rows.filter(r => r.mainType === 'main' && r.main === 'Fillet of Beef Wellington').length;
+  const cheese = rows.filter(r => r.dessert === 'Artisan Cheeseboard').length;
+  const prices = rows.map(r => { const p = priceOf(r); return p ? p.total : 0; });
+  const grand = prices.reduce((a, b) => a + b, 0);
+  const remaining = CONFIG.PARTY_SIZE - rows.length;
+  const li = arr => arr.length ? arr.map(([k, n]) => '<li><span>' + esc(k) + '</span><b>× ' + n + '</b></li>').join('') : '<li><span>None</span></li>';
+  const cell = v => isReal(v) ? esc(v) : '<span class="sam">' + esc(v || '') + '</span>';
+
+  $('sheet').innerHTML =
+    '<h1>' + esc(CONFIG.EVENT) + ' · Pre-order</h1>' +
+    '<p class="meta">' + esc(CONFIG.WHEN) + ' · Party of ' + CONFIG.PARTY_SIZE + ' · Organiser: ' + esc(CONFIG.ORGANISER) +
+      ' · ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + ' received' +
+      (isSample ? ' · <b style="color:#a51f2b">SAMPLE DATA (preview)</b>' : '') + '</p>' +
+    '<table><thead><tr><th>#</th><th>Name</th><th>Starter</th><th>Main</th><th>Dessert</th><th>Allergies / notes</th><th class="p">Price</th></tr></thead><tbody>' +
+    (rows.length ? rows.map((r, i) =>
+      '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td><td>' + cell(r.starter) + '</td><td>' +
+      (isReal(r.main) ? esc(r.main) + (r.mainType === 'starter' ? '<div class="sam">starter as main</div>' : '') : cell(r.main)) +
+      '</td><td>' + cell(r.dessert) + '</td><td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
+      '<td class="p">' + (prices[i] ? money(prices[i]) : '') + '</td></tr>').join('')
+      : '<tr><td colspan="7">No orders yet.</td></tr>') +
+    '</tbody>' + (rows.length ? '<tfoot><tr><td colspan="6">Total for ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</td><td class="p">' + money(grand) + '</td></tr></tfoot>' : '') +
+    '</table>' +
+    '<div class="totals">' +
+      '<div><h3>Starters</h3><ul>' + li(starters) + '</ul></div>' +
+      '<div><h3>Mains</h3><ul>' + li(mains) + '</ul></div>' +
+      '<div><h3>Desserts</h3><ul>' + li(desserts) + '</ul></div>' +
+    '</div>' +
+    '<p class="extra"><b>Courses:</b> ' + (courses.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') || 'none') +
+      (welly || cheese ? ' &nbsp; <b>£3 supplements:</b> ' + [welly ? 'Beef Wellington × ' + welly : '', cheese ? 'Cheeseboard × ' + cheese : ''].filter(Boolean).join(' · ') : '') + '</p>' +
+    (remaining > 0 ? '<p class="missing no-print">' + remaining + ' of ' + CONFIG.PARTY_SIZE + ' still to order.</p>' : '');
+}
+function downloadCsv(){
+  const head = ['Name', 'Email', 'Starter', 'Main', 'Starter as main?', 'Dessert', 'Allergies / notes', 'Price', 'Last updated'];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [head.map(q).join(',')].concat(ADMIN_ROWS.map(r => {
+    const p = priceOf(r);
+    return [r.name, r.email, r.starter, r.main, r.mainType === 'starter' ? 'Yes' : '', r.dessert, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
+  }));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'christmas-eve-orders.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function initAdmin(key){
+  document.body.classList.add('admin');
+  $('guest').hidden = true; $('admin').hidden = false;
+  document.title = 'Orders · ' + CONFIG.EVENT;
+  $('printBtn').addEventListener('click', () => window.print());
+  $('refreshBtn').addEventListener('click', () => loadAdmin(key));
+  $('csvBtn').addEventListener('click', downloadCsv);
+  loadAdmin(key);
+}
+
+/* ---------------- decorations ---------------- */
+function drawLights(){
+  const svg = $('lightsSvg'), w = Math.max(320, window.innerWidth), h = 58;
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  const sags = Math.max(2, Math.round(w / 260)), seg = w / sags, cols = ['#ff4d5a', '#ffd76a', '#5fd38a', '#6db8ff', '#fff4d6'];
+  let path = 'M0 4', bulbs = '';
+  for (let i = 0; i < sags; i++) path += ' Q' + (seg * i + seg / 2) + ' 34 ' + (seg * (i + 1)) + ' 4';
+  const y = x => { const t = (x % seg) / seg; return 4 + 2 * t * (1 - t) * 30; };
+  const step = 34; let k = 0;
+  for (let x = step / 2; x < w; x += step, k++){
+    const yy = y(x), c = cols[k % cols.length], delay = (-(k * 0.37) % 2.6).toFixed(2);
+    bulbs += '<g class="bulb" style="animation-delay:' + delay + 's"><rect x="' + (x - 2.5) + '" y="' + (yy - 1) + '" width="5" height="5" rx="1" fill="#2b2b2b"/>' +
+      '<ellipse cx="' + x + '" cy="' + (yy + 10) + '" rx="4.6" ry="7" fill="' + c + '"/>' +
+      '<ellipse cx="' + x + '" cy="' + (yy + 10) + '" rx="9" ry="11" fill="' + c + '" opacity=".22"/></g>';
+  }
+  svg.innerHTML = '<path d="' + path + '" stroke="#1d1d1d" stroke-width="1.6" fill="none"/>' + bulbs;
+}
+function startSnow(){
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('snow'), ctx = c.getContext('2d');
+  let W = 0, H = 0, flakes = [];
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function size(){
+    W = window.innerWidth; H = window.innerHeight;
+    c.width = W * dpr; c.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.min(110, Math.round(W / 9));
+    flakes = Array.from({length:n}, () => ({x:Math.random() * W, y:Math.random() * H, r:Math.random() * 2.2 + .6, s:Math.random() * .6 + .25, p:Math.random() * 6.28}));
+  }
+  size(); window.addEventListener('resize', size);
+  (function frame(){
+    ctx.clearRect(0, 0, W, H);
+    for (const f of flakes){
+      f.y += f.s; f.p += .012; f.x += Math.sin(f.p) * .35;
+      if (f.y > H + 4){ f.y = -4; f.x = Math.random() * W; }
+      ctx.globalAlpha = .45 + f.r / 6; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fillStyle = '#fff'; ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  })();
+}
+
+const params = new URLSearchParams(location.search);
+if (params.has('admin')) initAdmin(params.get('admin'));
+else { drawLights(); window.addEventListener('resize', drawLights); startSnow(); initGuest(); }
+</script>
+</body>
+</html>
