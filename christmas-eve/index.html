@@ -140,6 +140,7 @@
   .formerror{display:none;margin:14px 0 0;padding:12px 14px;border-radius:10px;background:#fbeeee;color:var(--berry);font-size:15px}
   .formerror.show{display:block}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .card{scroll-margin-top:34px}
   .done h2{font-family:var(--display);color:var(--berry);margin:0 0 8px;font-size:30px;text-align:center}
   .done p{margin:0 0 12px}
   .done .summary{margin-top:12px}
@@ -759,7 +760,7 @@ function showDone(o, res){
   $('doneList').innerHTML = listHtml(o, false);
   $('doneBill').innerHTML = billHtml(o);
   $('doneNote').textContent = priceOf(o) ? PRICE_NOTE : '';
-  window.scrollTo({top:0, behavior:'smooth'});
+  requestAnimationFrame(() => $('done').scrollIntoView({behavior:'smooth', block:'start'}));
 }
 /* put a saved order (from this device or from the Sheet) back into the form */
 function fillForm(o){
@@ -848,7 +849,7 @@ function initGuest(){
   $('notes').addEventListener('input', renderSummary);
   ['starterReq', 'mainReq', 'dessertReq'].forEach(k => $(k).addEventListener('input', renderSummary));
   $('orderForm').addEventListener('submit', submit);
-  $('againBtn').addEventListener('click', () => { $('done').hidden = true; $('orderForm').hidden = false; restore(); renderSummary(); window.scrollTo({top:0}); });
+  $('againBtn').addEventListener('click', () => { $('done').hidden = true; $('orderForm').hidden = false; restore(); renderSummary(); $('orderForm').scrollIntoView({behavior:'smooth', block:'start'}); });
   document.querySelectorAll('.menu-card').forEach(b => b.addEventListener('click', () => openMenu(b.dataset.menu, b)));
   restore();
   renderSummary();
