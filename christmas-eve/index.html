@@ -44,6 +44,19 @@
   .prices{display:inline-block;margin:0;padding:9px 18px;border:1px solid rgba(217,180,91,.7);border-radius:999px;
     font-size:14.5px;color:var(--cream);background:rgba(0,0,0,.18)}
   .prices b{color:var(--gold);font-weight:600}
+  .prices span{font-size:13.5px;color:#e9dfc4}
+  .tag{display:none;margin:8px 0 0;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;width:fit-content}
+  .tag.cf,.tag.mm{display:block}
+  .tag.cf{background:#e6f0e8;color:#173d2e;border:1px solid #9fc2aa}
+  .tag.mm{background:#f3eee2;color:#5d564a;border:1px solid #d6cbb0}
+  .steak{border-left:3px solid var(--gold);padding:2px 0 2px 14px;margin:-6px 0 20px}
+  .steak .field{margin-bottom:16px}
+  .steak label{font-size:16px}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:520px){.duo{grid-template-columns:1fr;gap:0}}
+  .tg{display:inline-block;font-size:11px;padding:0 6px;border-radius:999px;margin-left:4px;vertical-align:1px}
+  .tg.cf{background:#e6f0e8;color:#173d2e}
+  .tg.mm{background:#f1ece0;color:#6e675a}
   .demo{background:#fff7e0;border:1px solid #e7cf86;color:#6a5310;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:14px}
 
   /* ---------- menus ---------- */
@@ -172,7 +185,7 @@
       <h1>Christmas Eve</h1>
       <p class="at">at The Vane Arms</p>
       <svg class="holly" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
-      <p class="prices"><b>2 courses £29.95</b> &nbsp;·&nbsp; <b>3 courses £36.95</b> &nbsp;·&nbsp; Wellington &amp; cheeseboard +£3</p>
+      <p class="prices"><b>🎄 Christmas Fayre</b><br>2 courses £29.95 &nbsp;·&nbsp; 3 courses £36.95<br><span>Main menu dishes are priced individually</span></p>
       <div class="demo" id="demoBanner" hidden>Preview copy. Nothing here is saved or emailed.</div>
     </header>
 
@@ -209,6 +222,7 @@
       <div class="field" id="f-starter">
         <label for="starter">Starter</label>
         <select id="starter" name="starter"></select>
+        <p class="tag" id="t-starter"></p>
         <p class="desc" id="d-starter"></p>
         <div class="error">Please choose a starter, or "No starter".</div>
       </div>
@@ -216,13 +230,45 @@
       <div class="field" id="f-main" hidden>
         <label for="main" id="mainLabel">Main course</label>
         <select id="main" name="main"></select>
+        <p class="tag" id="t-main"></p>
         <p class="desc" id="d-main"></p>
         <div class="error">Please choose your main.</div>
+      </div>
+
+      <div class="steak" id="steakBox" hidden>
+        <div class="field" id="f-cook">
+          <label for="cook">How would you like your steak cooked?</label>
+          <select id="cook"></select>
+          <div class="error">Please choose how you'd like it cooked.</div>
+        </div>
+        <div class="duo">
+          <div class="field" id="f-side1">
+            <label for="side1">First side</label>
+            <select id="side1"></select>
+            <div class="error">Please choose a side.</div>
+          </div>
+          <div class="field" id="f-side2">
+            <label for="side2">Second side</label>
+            <select id="side2"></select>
+            <div class="error">Please choose a side.</div>
+          </div>
+        </div>
+        <div class="duo">
+          <div class="field">
+            <label for="extraSide">Extra side <span class="opt-tag">+£4</span></label>
+            <select id="extraSide"></select>
+          </div>
+          <div class="field">
+            <label for="sauce">Sauce <span class="opt-tag">+£3</span></label>
+            <select id="sauce"></select>
+          </div>
+        </div>
       </div>
 
       <div class="field" id="f-dessert">
         <label for="dessert">Dessert</label>
         <select id="dessert" name="dessert"></select>
+        <p class="tag" id="t-dessert"></p>
         <p class="desc" id="d-dessert"></p>
         <div class="error">Please choose a dessert, or "No dessert".</div>
       </div>
@@ -297,62 +343,136 @@ const CONFIG = {
   WHEN: 'Thursday 24 December 2026',
   ORGANISER: 'Scott Eason'
 };
-/* Prices in pence. A single course is charged at the 2-course price. */
-const PRICES = { TWO: 2995, THREE: 3695 };
+/* Prices in pence.
+   Christmas Fayre: set price by number of Fayre courses. One Fayre course is charged at the 2-course price.
+   Main menu: each dish at its own price. Steaks: extra side +£4, sauce +£3. */
+const FAYRE = { TWO: 2995, THREE: 3695 };
+const EXTRA_SIDE = 400, SAUCE = 300;
 
 const MENU_IMAGES = {
   fayre: { src: 'menus/christmas-fayre.jpg', title: 'Christmas Fayre menu' },
   main:  { src: 'menus/main-menu.jpg', title: 'Main menu' }
 };
 
-/* Christmas Fayre menu, as printed by The Vane Arms */
+const CF_GROUP = '🎄 Christmas Fayre (set price)';
 const MENU = {
   starters: [
-    {name:'Roasted Celeriac Velouté', desc:'Truffle & thyme croutons & sliced bloomer bread'},
-    {name:'Smoked Salmon, Atlantic Prawn & Crayfish Cocktail', desc:'Roe caviar, shredded baby gem, buttered brown bread'},
-    {name:'Chicken Liver Parfait', desc:'Caramelised red onion & cranberry chutney, toasted brioche bread'},
-    {name:'Sautéed Wild Mushroom & Spinach Soufflé', desc:'Truffle & parmesan cream reduction'},
-    {name:'Deep Fried Brie', desc:'Rocket and parmesan salad, redcurrant jelly & toasted brioche'}
+    { group: CF_GROUP, items: [
+      {name:'Roasted Celeriac Velouté', cf:1, desc:'Truffle & thyme croutons & sliced bloomer bread'},
+      {name:'Smoked Salmon, Atlantic Prawn & Crayfish Cocktail', cf:1, desc:'Roe caviar, shredded baby gem, buttered brown bread'},
+      {name:'Chicken Liver Parfait', cf:1, desc:'Caramelised red onion & cranberry chutney, toasted brioche bread'},
+      {name:'Sautéed Wild Mushroom & Spinach Soufflé', cf:1, desc:'Truffle & parmesan cream reduction'},
+      {name:'Deep Fried Brie', cf:1, desc:'Rocket and parmesan salad, redcurrant jelly & toasted brioche'}
+    ]},
+    { group: 'Main menu: small plates & garlic bread', items: [
+      {name:'Monkfish Cheek "Scampi"', price:750, desc:'Small plate. Tarragon mayonnaise'},
+      {name:'Mezze Board', price:750, desc:'Small plate. Hummus, olives, flatbread, olive oil (V, VE)'},
+      {name:'Classic Shetland Moules Marinière', price:750, desc:'Small plate'},
+      {name:'Braised Pig Cheek Tostada', price:750, desc:'Small plate. Celeriac, Granny Smith apple'},
+      {name:'Tempura Courgettes', price:750, desc:"Small plate. Goat's cheese dip (V, VE, GF)"},
+      {name:'Burrata', price:750, desc:'Small plate. Basil pesto, toasted pine nuts & basil oil (V)'},
+      {name:'Homemade Black Pudding Fritta', price:750, desc:"Small plate. Poached hen's egg, real ale syrup & crispy onions"},
+      {name:'Prawn Toast', price:750, desc:'Small plate. Sweet chilli dipping sauce'},
+      {name:'Polenta Chips', price:750, desc:'Small plate. Parmesan & truffle (V, VE, GF)'},
+      {name:'Ham Hock Terrine', price:750, desc:'Small plate. Pickled vegetables & Dijon mayonnaise (GF)'},
+      {name:'Cheese Loaded Potato Skins', price:750, desc:'Small plate. Sweet chilli dip (V, GF*)'},
+      {name:'Garlic Bread with Mozzarella', price:995, desc:'12-inch wood-fired sourdough'}
+    ]}
   ],
   mains: [
-    {name:'Traditional Roast Turkey', desc:'Turkey leg & cranberry ballotine, pigs in blankets, Yorkshire pudding & all the trimmings'},
-    {name:'Fillet of Beef Wellington', supp:300, short:'Beef Wellington', desc:'Spinach, wild mushroom duxelles, Parma ham, glazed orange and cardamom carrots, creamed mash, braised hispi & port wine jus'},
-    {name:'Confit Duck Leg', desc:'Braised red cabbage, Puy lentil cassoulet & tenderstem broccoli'},
-    {name:'Oven Roast Cod', desc:'Wild mushrooms, spinach, samphire, ratte potato mousse, brown shrimp, mustard mayo, panko crumb & pickled cucumbers'},
-    {name:'Roasted Cauliflower & Caramelised Onion Gnocchi', desc:'Served in a rich crème fraîche sauce & herb infused panko crumb'}
+    { group: CF_GROUP, items: [
+      {name:'Traditional Roast Turkey', cf:1, desc:'Turkey leg & cranberry ballotine, pigs in blankets, Yorkshire pudding & all the trimmings'},
+      {name:'Fillet of Beef Wellington', cf:1, supp:300, short:'Beef Wellington', desc:'Spinach, wild mushroom duxelles, Parma ham, glazed orange and cardamom carrots, creamed mash, braised hispi & port wine jus'},
+      {name:'Confit Duck Leg', cf:1, desc:'Braised red cabbage, Puy lentil cassoulet & tenderstem broccoli'},
+      {name:'Oven Roast Cod', cf:1, desc:'Wild mushrooms, spinach, samphire, ratte potato mousse, brown shrimp, mustard mayo, panko crumb & pickled cucumbers'},
+      {name:'Roasted Cauliflower & Caramelised Onion Gnocchi', cf:1, desc:'Served in a rich crème fraîche sauce & herb infused panko crumb'}
+    ]},
+    { group: 'Main menu: classics', items: [
+      {name:'8oz Cheeseburger', price:1795, desc:'Baby gem lettuce, tomato, Monterey Jack smoked cheese, BBQ sauce, garlic mayo, coleslaw & seasoned fries'},
+      {name:'Classic Chicken Parmo', price:1825, desc:'Béchamel, house cheese blend, salad, chunky chips & garlic mayo'},
+      {name:'Classic Chicken Parmo with Hot Shot', price:2125, desc:'Parmo topped with jalapeños, pepperoni & onion (hot shot +£3)'},
+      {name:'Fish & Chips', price:1825, desc:'Beer battered cod & chips, lemon & tartare sauce, bread & butter'},
+      {name:'Whitby Scampi', price:1725, desc:'8 pieces of Whitby scampi, chunky chips, lemon, tartare sauce'},
+      {name:'Chicken Caesar Salad', price:1695, desc:'Chicken, cos lettuce, sourdough croutons, parmesan cheese & Caesar dressing'}
+    ]},
+    { group: 'Main menu: the grill (served with two sides)', items: [
+      {name:'8oz Fillet Steak', price:3195, steak:1, desc:'A classic centre cut fillet, exceptionally tender (GF)'},
+      {name:'10oz Ribeye Steak', price:2795, steak:1, desc:'Richly marbled for maximum flavour (GF)'},
+      {name:'10oz Sirloin Steak', price:2895, steak:1, desc:'Most popular cut (GF)'},
+      {name:'8oz Bistro Rump Steak', price:2295, steak:1, desc:'A leaner cut with bold, beefy character (GF)'}
+    ]},
+    { group: "Main menu: head chef's recommendation", items: [
+      {name:'Monkfish Wrapped in Parma Ham', price:2850, desc:'Fondant potato, braised hispi cabbage, miso velouté, keta roe & dill oil (GF)'},
+      {name:'Duo of Lamb', price:2995, desc:'4oz lamb rump, braised lamb shoulder, courgette & basil purée, broad beans, cabbage, garden peas, pan juices & rosemary new potatoes (GF)'}
+    ]},
+    { group: 'Main menu: 12-inch sourdough pizzas', items: [
+      {name:'Margherita Pizza', price:1095, desc:'Mozzarella, basil & tomato base. Gluten free base on request'},
+      {name:'Meat Feast Pizza', price:1295, desc:'Pepperoni, sliced sausage, ham hock, mozzarella & hot honey drizzle. Gluten free base on request'},
+      {name:'Pepperoni Pizza', price:1295, desc:'Mozzarella, tomato base & cured pepperoni slices. Gluten free base on request'},
+      {name:'Ham Hock & Dijon Mayo Pizza', price:1295, desc:'Tomato base, pulled ham hock, Dijon mayo & mozzarella. Gluten free base on request'},
+      {name:'The Mediterranean Pizza', price:1295, desc:"Goat's cheese, Mediterranean vegetables, basil pesto, tomato base & mozzarella. Gluten free base on request"}
+    ]}
   ],
   desserts: [
-    {name:'Sticky Toffee Pudding', desc:'Butterscotch sauce & vanilla pod ice cream'},
-    {name:'Double Chocolate Brownie', desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
-    {name:'Traditional Christmas Pudding', desc:'Brandy sauce & redcurrants'},
-    {name:'Espresso Crème Brûlée', desc:'Homemade shortbread'},
-    {name:'Artisan Cheeseboard', supp:300, short:'Cheeseboard', desc:'Brie, cheddar, Yorkshire blue, selection of biscuits, chutney, grapes & celery'},
-    {name:'Spiced Poached Pear Cheesecake', desc:'Vanilla pod ice cream'}
+    { group: CF_GROUP, items: [
+      {name:'Sticky Toffee Pudding', cf:1, desc:'Butterscotch sauce & vanilla pod ice cream'},
+      {name:'Double Chocolate Brownie', cf:1, desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
+      {name:'Traditional Christmas Pudding', cf:1, desc:'Brandy sauce & redcurrants'},
+      {name:'Espresso Crème Brûlée', cf:1, desc:'Homemade shortbread'},
+      {name:'Artisan Cheeseboard', cf:1, supp:300, short:'Cheeseboard', desc:'Brie, cheddar, Yorkshire blue, selection of biscuits, chutney, grapes & celery'},
+      {name:'Spiced Poached Pear Cheesecake', cf:1, desc:'Vanilla pod ice cream'}
+    ]},
+    { group: 'Main menu: desserts', items: [
+      {name:'Sticky Toffee Pudding (salted caramel ice cream)', price:700, desc:'Butterscotch sauce & salted caramel ice cream'},
+      {name:'Chocolate Brownie', price:700, desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
+      {name:'Lemon Tiramisu', price:700, desc:'Limoncello syrup, lemon-infused mascarpone & lemon curd'},
+      {name:'Apple Frangipane Bakewell Tart', price:700, desc:'Served with crème anglaise'},
+      {name:'Knickerbocker Glory', price:700, desc:'Chocolate sauce, wafer, brownie pieces & marshmallows (GF*)'},
+      {name:'Cheesecake of the Day', price:700, desc:'Vanilla pod ice cream or pouring cream'}
+    ]}
   ]
 };
+const SIDES = ['Smoked Mac & Cheese', 'Charred Tenderstem Broccoli', 'Green Beans', 'Caesar Salad', 'House Salad',
+  'Chunky Chips', 'Seasoned Fries', 'Onion Rings', 'Truffle & Parmesan Fries', '2 Tomatoes / 2 Flat Cap Mushrooms'];
+const SAUCES = ['Peppercorn', 'Diane', 'Garlic Butter'];
+const COOK = ['Blue', 'Rare', 'Medium rare', 'Medium', 'Medium well', 'Well done'];
 const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert'};
+const NO_EXTRA = 'No extra side', NO_SAUCE = 'No sauce';
 
 const $ = id => document.getElementById(id);
 const LIVE = /^https:\/\/script\.google\.com\//.test(CONFIG.SCRIPT_URL);
 const byName = {};
-[...MENU.starters, ...MENU.mains, ...MENU.desserts].forEach(d => byName[d.name] = d);
-const label = d => d.name + (d.supp ? ' (+£' + (d.supp / 100) + ')' : '');
+['starters', 'mains', 'desserts'].forEach(k => MENU[k].forEach(g => g.items.forEach(d => byName[d.name] = d)));
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = p => '£' + (p / 100).toFixed(2);
 const isReal = v => !!v && !Object.values(NONE).includes(v);
+const optText = d => d.name + (d.cf ? ' · Christmas Fayre' + (d.supp ? ' +' + money(d.supp).replace('.00', '') : '') : ' · ' + money(d.price));
+const tagText = d => d.cf ? '🎄 Christmas Fayre' + (d.supp ? ' (+' + money(d.supp).replace('.00', '') + ' supplement)' : '') : 'Main menu · ' + money(d.price) + ' (not part of the Christmas Fayre)';
 
 /* ---------------- pricing ---------------- */
 function courseCount(o){ return [o.starter, o.main, o.dessert].filter(isReal).length; }
+function isSteak(o){ const d = byName[o.main]; return o.mainType === 'main' && !!(d && d.steak); }
+function steakText(o){
+  if (!isSteak(o)) return '';
+  const bits = [o.cook, [o.side1, o.side2].filter(Boolean).join(' & ')];
+  if (o.extraSide && o.extraSide !== NO_EXTRA) bits.push('extra side: ' + o.extraSide);
+  if (o.sauce && o.sauce !== NO_SAUCE) bits.push(o.sauce + ' sauce');
+  return bits.filter(Boolean).join(', ');
+}
 function priceOf(o){
-  const n = courseCount(o);
-  if (!n) return null;
+  const picks = [o.starter, o.main, o.dessert].filter(isReal).map(n => byName[n]).filter(Boolean);
+  if (!picks.length) return null;
   const lines = [];
-  const base = n >= 3 ? PRICES.THREE : PRICES.TWO;
-  lines.push([n === 1 ? '1 course (2-course price)' : n + ' courses', base]);
-  const mainDish = o.mainType === 'main' ? byName[o.main] : null;
-  if (mainDish && mainDish.supp) lines.push([mainDish.short + ' supplement', mainDish.supp]);
-  const d = byName[o.dessert];
-  if (d && d.supp) lines.push([d.short + ' supplement', d.supp]);
+  const nf = picks.filter(d => d.cf).length;
+  if (nf) lines.push([nf === 1 ? 'Christmas Fayre, 1 course (charged at the 2-course price)' : 'Christmas Fayre, ' + nf + ' courses', nf >= 3 ? FAYRE.THREE : FAYRE.TWO]);
+  const mainD = byName[o.main], dessD = byName[o.dessert];
+  if (o.mainType === 'main' && mainD && mainD.cf && mainD.supp) lines.push([mainD.short + ' supplement', mainD.supp]);
+  if (dessD && dessD.cf && dessD.supp) lines.push([dessD.short + ' supplement', dessD.supp]);
+  [o.starter, o.main, o.dessert].forEach(n => { const d = isReal(n) && byName[n]; if (d && !d.cf) lines.push([d.name, d.price]); });
+  if (isSteak(o)){
+    if (o.extraSide && o.extraSide !== NO_EXTRA) lines.push(['Extra side: ' + o.extraSide, EXTRA_SIDE]);
+    if (o.sauce && o.sauce !== NO_SAUCE) lines.push([o.sauce + ' sauce', SAUCE]);
+  }
   return { lines, total: lines.reduce((a, l) => a + l[1], 0) };
 }
 function billHtml(o){
@@ -363,28 +483,59 @@ function billHtml(o){
 }
 
 /* ---------------- guest form ---------------- */
-function fillSelect(sel, items, placeholder, noneText){
+function fillGrouped(sel, groups, placeholder, noneText){
   sel.innerHTML = '';
   const ph = new Option(placeholder, ''); ph.disabled = true; ph.selected = true; sel.add(ph);
   if (noneText) sel.add(new Option(noneText, noneText));
-  items.forEach(d => sel.add(new Option(label(d), d.name)));
+  groups.forEach(g => {
+    const og = document.createElement('optgroup'); og.label = g.group;
+    g.items.forEach(d => og.appendChild(new Option(optText(d), d.name)));
+    sel.appendChild(og);
+  });
+}
+function fillPlain(sel, items, placeholder){
+  sel.innerHTML = '';
+  if (placeholder){ const ph = new Option(placeholder, ''); ph.disabled = true; ph.selected = true; sel.add(ph); }
+  items.forEach(v => sel.add(new Option(v, v)));
 }
 function mainType(){ const r = document.querySelector('input[name=mainType]:checked'); return r ? r.value : ''; }
 function setMainList(){
   const t = mainType(), sel = $('main'), keep = sel.value;
   $('f-main').hidden = !(t === 'main' || t === 'starter');
-  if (t === 'main'){ $('mainLabel').textContent = 'Main course'; fillSelect(sel, MENU.mains, 'Choose your main…'); }
-  if (t === 'starter'){ $('mainLabel').textContent = 'Your main (from the starters)'; fillSelect(sel, MENU.starters, 'Choose a starter as your main…'); }
+  if (t === 'main'){ $('mainLabel').textContent = 'Main course'; fillGrouped(sel, MENU.mains, 'Choose your main…'); }
+  if (t === 'starter'){ $('mainLabel').textContent = 'Your main (from the starters)'; fillGrouped(sel, MENU.starters, 'Choose a starter as your main…'); }
   if ([...sel.options].some(o => o.value === keep && keep)) sel.value = keep;
   showDesc('main');
 }
-function showDesc(k){ const d = byName[$(k).value]; $('d-' + k).textContent = d ? d.desc : ''; }
+function showDesc(k){
+  const d = byName[$(k).value];
+  $('d-' + k).textContent = d ? d.desc : '';
+  const t = $('t-' + k);
+  t.className = 'tag' + (d ? (d.cf ? ' cf' : ' mm') : '');
+  t.textContent = d ? tagText(d) : '';
+  if (k === 'main') $('steakBox').hidden = !isSteak(currentOrder());
+}
 function currentOrder(){
   const t = mainType();
   return {
     name: $('name').value.trim(), email: $('email').value.trim(), mainType: t,
     starter: $('starter').value, main: t === 'none' ? NONE.main : $('main').value,
-    dessert: $('dessert').value, notes: $('notes').value.trim(), website: $('website').value
+    dessert: $('dessert').value, notes: $('notes').value.trim(),
+    cook: $('cook').value, side1: $('side1').value, side2: $('side2').value,
+    extraSide: $('extraSide').value, sauce: $('sauce').value,
+    website: $('website').value
+  };
+}
+function payload(o){
+  const steak = isSteak(o);
+  const p = priceOf(o);
+  return {
+    action: 'submit', name: o.name, email: o.email, mainType: o.mainType,
+    starter: o.starter, main: o.main, dessert: o.dessert, notes: o.notes,
+    cook: steak ? o.cook : '', side1: steak ? o.side1 : '', side2: steak ? o.side2 : '',
+    extraSide: steak && o.extraSide !== NO_EXTRA ? o.extraSide : '', sauce: steak && o.sauce !== NO_SAUCE ? o.sauce : '',
+    bill: p ? { lines: p.lines, total: p.total } : null,
+    website: o.website
   };
 }
 function mainText(o){
@@ -392,7 +543,9 @@ function mainText(o){
   return o.mainType === 'starter' ? o.main + ' (starter as main)' : o.main;
 }
 function listHtml(o, showEmpty){
-  const rows = [['Starter', o.starter], ['Main', o.mainType ? mainText(o) : ''], ['Dessert', o.dessert]];
+  const rows = [['Starter', o.starter], ['Main', o.mainType ? mainText(o) : '']];
+  const st = steakText(o); if (st) rows.push(['Steak', st]);
+  rows.push(['Dessert', o.dessert]);
   if (o.notes) rows.push(['Notes', o.notes]);
   return rows.map(([k, v]) => '<dt>' + k + '</dt><dd>' + (v ? esc(v) : (showEmpty ? '<span style="color:#a39c8c">not chosen yet</span>' : '')) + '</dd>').join('');
 }
@@ -409,6 +562,10 @@ function validate(o){
   check('f-mainType', !o.mainType);
   check('f-starter', !o.starter);
   check('f-main', (o.mainType === 'main' || o.mainType === 'starter') && !o.main);
+  const steak = isSteak(o);
+  check('f-cook', steak && !o.cook);
+  check('f-side1', steak && !o.side1);
+  check('f-side2', steak && !o.side2);
   check('f-dessert', !o.dessert);
   check('f-email', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(o.email));
   const complete = o.mainType && o.starter && o.dessert && (o.mainType === 'none' || o.main);
@@ -425,7 +582,7 @@ async function submit(e){
   try {
     let res;
     if (LIVE){
-      const r = await fetch(CONFIG.SCRIPT_URL, {method:'POST', body: JSON.stringify(Object.assign({action:'submit'}, o))});
+      const r = await fetch(CONFIG.SCRIPT_URL, {method:'POST', body: JSON.stringify(payload(o))});
       res = await r.json();
     } else {
       await new Promise(r => setTimeout(r, 500));
@@ -459,15 +616,23 @@ function restore(){
   $('name').value = o.name || ''; $('email').value = o.email || ''; $('notes').value = o.notes || '';
   const r = document.querySelector('input[name=mainType][value="' + o.mainType + '"]'); if (r) r.checked = true;
   setMainList();
-  ['starter', 'dessert'].forEach(k => { if (o[k]) $(k).value = o[k]; showDesc(k); });
-  if (o.main && o.mainType !== 'none') { $('main').value = o.main; showDesc('main'); }
+  const setIf = (id, v) => { if (v && [...$(id).options].some(x => x.value === v)) $(id).value = v; };
+  ['starter', 'dessert'].forEach(k => { setIf(k, o[k]); showDesc(k); });
+  ['cook', 'side1', 'side2', 'extraSide', 'sauce'].forEach(k => setIf(k, o[k]));
+  if (o.main && o.mainType !== 'none') { setIf('main', o.main); showDesc('main'); }
 }
 function initGuest(){
   if (!LIVE) $('demoBanner').hidden = false;
-  fillSelect($('starter'), MENU.starters, 'Choose a starter…', NONE.starter);
-  fillSelect($('dessert'), MENU.desserts, 'Choose a dessert…', NONE.dessert);
+  fillGrouped($('starter'), MENU.starters, 'Choose a starter…', NONE.starter);
+  fillGrouped($('dessert'), MENU.desserts, 'Choose a dessert…', NONE.dessert);
+  fillPlain($('cook'), COOK, 'Choose…');
+  fillPlain($('side1'), SIDES, 'Choose a side…');
+  fillPlain($('side2'), SIDES, 'Choose a side…');
+  fillPlain($('extraSide'), [NO_EXTRA].concat(SIDES));
+  fillPlain($('sauce'), [NO_SAUCE].concat(SAUCES));
   document.querySelectorAll('input[name=mainType]').forEach(r => r.addEventListener('change', () => { setMainList(); setInvalid('f-mainType', false); renderSummary(); }));
   ['starter', 'main', 'dessert'].forEach(k => $(k).addEventListener('change', () => { showDesc(k); setInvalid('f-' + k, false); setInvalid('f-any', false); renderSummary(); }));
+  ['cook', 'side1', 'side2', 'extraSide', 'sauce'].forEach(k => $(k).addEventListener('change', () => { if ($('f-' + k)) setInvalid('f-' + k, false); renderSummary(); }));
   ['name', 'email'].forEach(k => $(k).addEventListener('input', () => { setInvalid('f-' + k, false); renderSummary(); }));
   $('notes').addEventListener('input', renderSummary);
   $('orderForm').addEventListener('submit', submit);
@@ -505,16 +670,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('lb').h
 /* ---------------- organiser / print view ---------------- */
 let ADMIN_ROWS = [];
 function sampleRows(){
-  const s = MENU.starters, m = MENU.mains, d = MENU.desserts;
-  const picks = [
-    [s[0].name,'main',m[0].name,d[0].name,''],
-    [s[2].name,'main',m[1].name,d[2].name,''],
-    [NONE.starter,'starter',s[4].name,d[4].name,'No nuts please'],
-    [s[1].name,'main',m[3].name,NONE.dessert,''],
-    [s[3].name,'main',m[4].name,d[1].name,'Vegetarian'],
-    [NONE.starter,'none',NONE.main,d[3].name,'']
-  ];
-  return picks.map((p, i) => ({name:'Sample Guest ' + 'ABCDEF'[i], starter:p[0], mainType:p[1], main:p[2], dessert:p[3], notes:p[4], email:'sample@example.com', updated:''}));
+  return [
+    {name:'Sample Guest A', starter:'Roasted Celeriac Velouté', mainType:'main', main:'Traditional Roast Turkey', dessert:'Sticky Toffee Pudding', notes:''},
+    {name:'Sample Guest B', starter:'Burrata', mainType:'main', main:'10oz Ribeye Steak', dessert:'Lemon Tiramisu', notes:'', cook:'Medium rare', side1:'Chunky Chips', side2:'Onion Rings', extraSide:'', sauce:'Peppercorn'},
+    {name:'Sample Guest C', starter:NONE.starter, mainType:'starter', main:'Deep Fried Brie', dessert:'Artisan Cheeseboard', notes:'No nuts please'},
+    {name:'Sample Guest D', starter:'Prawn Toast', mainType:'main', main:'Fillet of Beef Wellington', dessert:NONE.dessert, notes:''},
+    {name:'Sample Guest E', starter:NONE.starter, mainType:'main', main:'Margherita Pizza', dessert:'Knickerbocker Glory', notes:'Gluten free base'}
+  ].map(r => Object.assign({email:'sample@example.com', updated:''}, r));
 }
 async function loadAdmin(key){
   $('adminError').classList.remove('show');
@@ -538,19 +700,25 @@ function tally(list){
   const m = new Map(); list.forEach(v => m.set(v, (m.get(v) || 0) + 1));
   return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
+function dishCell(v, sub){
+  if (!isReal(v)) return '<span class="sam">' + esc(v || '') + '</span>';
+  const d = byName[v];
+  const tg = d && !d.cf ? '<span class="tg mm">Main menu</span>' : '';
+  return esc(v) + tg + (sub ? '<div class="sam">' + esc(sub) + '</div>' : '');
+}
 function renderSheet(isSample){
   const rows = ADMIN_ROWS;
   const starters = tally(rows.map(r => r.starter).filter(isReal));
   const mains = tally(rows.filter(r => isReal(r.main)).map(r => r.mainType === 'starter' ? r.main + ' (starter as main)' : r.main));
   const desserts = tally(rows.map(r => r.dessert).filter(isReal));
-  const courses = tally(rows.map(r => { const n = courseCount(r); return n + (n === 1 ? ' course' : ' courses'); }));
-  const welly = rows.filter(r => r.mainType === 'main' && r.main === 'Fillet of Beef Wellington').length;
-  const cheese = rows.filter(r => r.dessert === 'Artisan Cheeseboard').length;
+  const steaks = rows.filter(isSteak);
+  const sides = tally([].concat(...steaks.map(r => [r.side1, r.side2, r.extraSide].filter(v => v && v !== NO_EXTRA))));
+  const sauces = tally(steaks.map(r => r.sauce).filter(v => v && v !== NO_SAUCE));
   const prices = rows.map(r => { const p = priceOf(r); return p ? p.total : 0; });
   const grand = prices.reduce((a, b) => a + b, 0);
+  const fayreCount = rows.filter(r => [r.starter, r.main, r.dessert].some(n => byName[n] && byName[n].cf)).length;
   const remaining = CONFIG.PARTY_SIZE - rows.length;
   const li = arr => arr.length ? arr.map(([k, n]) => '<li><span>' + esc(k) + '</span><b>× ' + n + '</b></li>').join('') : '<li><span>None</span></li>';
-  const cell = v => isReal(v) ? esc(v) : '<span class="sam">' + esc(v || '') + '</span>';
 
   $('sheet').innerHTML =
     '<h1>' + esc(CONFIG.EVENT) + ' · Pre-order</h1>' +
@@ -559,9 +727,11 @@ function renderSheet(isSample){
       (isSample ? ' · <b style="color:#a51f2b">SAMPLE DATA (preview)</b>' : '') + '</p>' +
     '<table><thead><tr><th>#</th><th>Name</th><th>Starter</th><th>Main</th><th>Dessert</th><th>Allergies / notes</th><th class="p">Price</th></tr></thead><tbody>' +
     (rows.length ? rows.map((r, i) =>
-      '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td><td>' + cell(r.starter) + '</td><td>' +
-      (isReal(r.main) ? esc(r.main) + (r.mainType === 'starter' ? '<div class="sam">starter as main</div>' : '') : cell(r.main)) +
-      '</td><td>' + cell(r.dessert) + '</td><td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
+      '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td>' +
+      '<td>' + dishCell(r.starter) + '</td>' +
+      '<td>' + dishCell(r.main, r.mainType === 'starter' ? 'starter as main' : steakText(r)) + '</td>' +
+      '<td>' + dishCell(r.dessert) + '</td>' +
+      '<td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
       '<td class="p">' + (prices[i] ? money(prices[i]) : '') + '</td></tr>').join('')
       : '<tr><td colspan="7">No orders yet.</td></tr>') +
     '</tbody>' + (rows.length ? '<tfoot><tr><td colspan="6">Total for ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</td><td class="p">' + money(grand) + '</td></tr></tfoot>' : '') +
@@ -571,16 +741,18 @@ function renderSheet(isSample){
       '<div><h3>Mains</h3><ul>' + li(mains) + '</ul></div>' +
       '<div><h3>Desserts</h3><ul>' + li(desserts) + '</ul></div>' +
     '</div>' +
-    '<p class="extra"><b>Courses:</b> ' + (courses.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') || 'none') +
-      (welly || cheese ? ' &nbsp; <b>£3 supplements:</b> ' + [welly ? 'Beef Wellington × ' + welly : '', cheese ? 'Cheeseboard × ' + cheese : ''].filter(Boolean).join(' · ') : '') + '</p>' +
+    (steaks.length ? '<p class="extra"><b>Steak sides:</b> ' + sides.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') +
+      (sauces.length ? ' &nbsp; <b>Sauces:</b> ' + sauces.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') : '') + '</p>' : '') +
+    '<p class="extra">Dishes marked <span class="tg mm">Main menu</span> are from the main menu. Everything else is Christmas Fayre. ' +
+      '<b>Christmas Fayre:</b> ' + fayreCount + ' of ' + rows.length + ' people have at least one Fayre course.</p>' +
     (remaining > 0 ? '<p class="missing no-print">' + remaining + ' of ' + CONFIG.PARTY_SIZE + ' still to order.</p>' : '');
 }
 function downloadCsv(){
-  const head = ['Name', 'Email', 'Starter', 'Main', 'Starter as main?', 'Dessert', 'Allergies / notes', 'Price', 'Last updated'];
+  const head = ['Name', 'Email', 'Starter', 'Main', 'Starter as main?', 'Steak details', 'Dessert', 'Allergies / notes', 'Price', 'Last updated'];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   const lines = [head.map(q).join(',')].concat(ADMIN_ROWS.map(r => {
     const p = priceOf(r);
-    return [r.name, r.email, r.starter, r.main, r.mainType === 'starter' ? 'Yes' : '', r.dessert, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
+    return [r.name, r.email, r.starter, r.main, r.mainType === 'starter' ? 'Yes' : '', steakText(r), r.dessert, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
   }));
   const blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'christmas-eve-orders.csv';
