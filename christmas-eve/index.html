@@ -41,10 +41,22 @@
     font-size:clamp(46px,13vw,72px);text-shadow:0 2px 18px rgba(217,180,91,.25)}
   .at{font-family:var(--display);font-style:italic;font-weight:500;font-size:clamp(22px,6vw,30px);margin:4px 0 10px;color:var(--cream)}
   .holly{display:block;margin:6px auto 12px;width:74px;height:30px}
-  .prices{display:inline-block;margin:0;padding:9px 18px;border:1px solid rgba(217,180,91,.7);border-radius:999px;
-    font-size:14.5px;color:var(--cream);background:rgba(0,0,0,.18)}
-  .prices b{color:var(--gold);font-weight:600}
-  .prices span{font-size:13.5px;color:#e9dfc4}
+  .prices{display:inline-block;max-width:100%;margin:0;padding:12px 18px;border:1px solid rgba(217,180,91,.7);border-radius:16px;
+    font-size:14.5px;line-height:1.45;color:var(--cream);background:rgba(0,0,0,.18)}
+  .prices div+div{margin-top:4px}
+  .prices b{display:block;color:var(--gold);font-weight:600}
+  .prices .pp{font-size:13.5px;color:#e9dfc4;margin-top:8px;padding-top:7px;border-top:1px solid rgba(217,180,91,.35)}
+  .extras{border:1px solid #d3c7a8;border-radius:12px;background:#fff;padding:0}
+  .extras summary{cursor:pointer;list-style:none;padding:13px 14px;font-family:var(--display);font-weight:600;font-size:17px;color:var(--pine);display:flex;align-items:center;gap:8px}
+  .extras summary::-webkit-details-marker{display:none}
+  .extras summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--berry);border-bottom:2px solid var(--berry);transform:rotate(45deg);transition:transform .15s}
+  .extras[open] summary::after{transform:rotate(-135deg)}
+  .extras .xl{margin:4px 14px 8px;font-size:13.5px;font-weight:600;color:var(--muted)}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 14px 12px}
+  @media (max-width:420px){.checks{grid-template-columns:1fr}}
+  .chk{display:flex;align-items:center;gap:10px;border:1px solid #e0d6bd;border-radius:9px;padding:9px 10px;font-size:15px;cursor:pointer;margin:0;font-family:inherit;font-weight:400;color:var(--ink)}
+  .chk input{width:19px;height:19px;margin:0;accent-color:var(--berry);flex:none}
+  .chk:has(input:checked){border-color:var(--berry);background:#fbf0ee}
   .tag{display:none;margin:8px 0 0;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;width:fit-content}
   .tag.cf,.tag.mm{display:block}
   .tag.cf{background:#e6f0e8;color:#173d2e;border:1px solid #9fc2aa}
@@ -190,7 +202,11 @@
       <h1>Christmas Eve</h1>
       <p class="at">at The Vane Arms</p>
       <svg class="holly" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
-      <p class="prices"><b>🎄 Christmas Fayre</b><br>2 courses £29.95 &nbsp;·&nbsp; 3 courses £36.95<br><b>Saver menu</b><br>2 courses £21.95 &nbsp;·&nbsp; 3 courses £26.95<br><span>Main and lunch menu dishes are priced individually</span></p>
+      <div class="prices">
+        <div><b>🎄 Christmas Fayre</b> 2 courses £29.95 · 3 courses £36.95</div>
+        <div><b>Saver menu</b> 2 courses £21.95 · 3 courses £26.95</div>
+        <div class="pp">Main and lunch menus: priced per dish</div>
+      </div>
       <div class="demo" id="demoBanner" hidden>Preview copy. Nothing here is saved or emailed.</div>
     </header>
 
@@ -267,18 +283,16 @@
             <div class="error">Please choose a side.</div>
           </div>
         </div>
-        <div class="duo">
-          <div class="field">
-            <label for="extraSide">Extra side <span class="opt-tag">+£4</span></label>
-            <select id="extraSide"></select>
-          </div>
-          <div class="field">
-            <label for="sauce">Sauce <span class="opt-tag">+£3</span></label>
-            <select id="sauce"></select>
-          </div>
-        </div>
         </div>
       </div>
+
+      <details class="field extras" id="extrasBox">
+        <summary>Add sides or sauces <span class="opt-tag" id="extrasCount">(optional)</span></summary>
+        <p class="xl">Sides, £4 each</p>
+        <div class="checks" id="sideChecks"></div>
+        <p class="xl">Sauces, £3 each</p>
+        <div class="checks" id="sauceChecks"></div>
+      </details>
 
       <div class="field" id="f-dessert">
         <label for="dessert">Dessert</label>
@@ -363,131 +377,119 @@ const CONFIG = {
   ORGANISER: 'Scott Eason'
 };
 /* Prices in pence.
-   Christmas Fayre: set price by number of Fayre courses. One Fayre course is charged at the 2-course price.
-   Main menu: each dish at its own price. Steaks: extra side +£4, sauce +£3. */
+   Set menus (Christmas Fayre, Saver): priced by how many courses come from that menu.
+   One course on its own from a set menu is charged at that menu's 2-course price.
+   Main menu and lunch menu: each dish at its own price.
+   A dish that appears on more than one menu is listed once and counted against
+   whichever menu gives the lowest total for that person's whole order. */
 const SETS = {
   cf: { label: 'Christmas Fayre', two: 2995, three: 3695 },
   sv: { label: 'Saver menu', two: 2195, three: 2695 }
 };
-const EXTRA_SIDE = 400, SAUCE = 300;
+const SIDE_PRICE = 400, SAUCE_PRICE = 300;
 
 const MENU_IMAGES = {
   fayre: { src: 'menus/christmas-fayre.jpg', title: 'Christmas Fayre menu' },
   main:  { src: 'menus/main-menu.jpg', title: 'Main, Saver & Lunch menus' }
 };
 
-const CF_GROUP = '🎄 Christmas Fayre (set price)';
-const SV_GROUP = 'Saver menu (set price: 2 courses £21.95, 3 courses £26.95)';
+/* Each dish lists the menus it's on (v), in order of preference. */
+const CF = x => Object.assign({src:'cf'}, x || {});
+const SV = desc => ({src:'sv', desc});
+const MM = (price, desc) => ({src:'mm', price, desc});
+const LN = (price, desc) => ({src:'ln', price, desc});
+const FAYRE_GROUP = '🎄 Christmas Fayre (set price)';
+
 const MENU = {
   starters: [
-    { group: CF_GROUP, items: [
-      {name:'Roasted Celeriac Velouté', cf:1, desc:'Truffle & thyme croutons & sliced bloomer bread'},
-      {name:'Smoked Salmon, Atlantic Prawn & Crayfish Cocktail', cf:1, desc:'Roe caviar, shredded baby gem, buttered brown bread'},
-      {name:'Chicken Liver Parfait', cf:1, desc:'Caramelised red onion & cranberry chutney, toasted brioche bread'},
-      {name:'Sautéed Wild Mushroom & Spinach Soufflé', cf:1, desc:'Truffle & parmesan cream reduction'},
-      {name:'Deep Fried Brie', cf:1, desc:'Rocket and parmesan salad, redcurrant jelly & toasted brioche'}
+    { group: FAYRE_GROUP, items: [
+      {name:'Roasted Celeriac Velouté', v:[CF()], desc:'Truffle & thyme croutons & sliced bloomer bread'},
+      {name:'Smoked Salmon, Atlantic Prawn & Crayfish Cocktail', v:[CF()], desc:'Roe caviar, shredded baby gem, buttered brown bread'},
+      {name:'Chicken Liver Parfait', v:[CF()], desc:'Caramelised red onion & cranberry chutney, toasted brioche bread'},
+      {name:'Sautéed Wild Mushroom & Spinach Soufflé', v:[CF()], desc:'Truffle & parmesan cream reduction'},
+      {name:'Deep Fried Brie', v:[CF()], desc:'Rocket and parmesan salad, redcurrant jelly & toasted brioche'}
     ]},
-    { group: 'Main menu: small plates & garlic bread', items: [
-      {name:'Monkfish Cheek "Scampi"', price:750, desc:'Small plate. Tarragon mayonnaise'},
-      {name:'Mezze Board', price:750, desc:'Small plate. Hummus, olives, flatbread, olive oil (V, VE)'},
-      {name:'Classic Shetland Moules Marinière', price:750, desc:'Small plate'},
-      {name:'Braised Pig Cheek Tostada', price:750, desc:'Small plate. Celeriac, Granny Smith apple'},
-      {name:'Tempura Courgettes', price:750, desc:"Small plate. Goat's cheese dip (V, VE, GF)"},
-      {name:'Burrata', price:750, desc:'Small plate. Basil pesto, toasted pine nuts & basil oil (V)'},
-      {name:'Homemade Black Pudding Fritta', price:750, desc:"Small plate. Poached hen's egg, real ale syrup & crispy onions"},
-      {name:'Prawn Toast', price:750, desc:'Small plate. Sweet chilli dipping sauce'},
-      {name:'Polenta Chips', price:750, desc:'Small plate. Parmesan & truffle (V, VE, GF)'},
-      {name:'Ham Hock Terrine', price:750, desc:'Small plate. Pickled vegetables & Dijon mayonnaise (GF)'},
-      {name:'Cheese Loaded Potato Skins', price:750, desc:'Small plate. Sweet chilli dip (V, GF*)'},
-      {name:'Garlic Bread with Mozzarella', price:995, desc:'12-inch wood-fired sourdough'}
-    ]},
-    { group: SV_GROUP, items: [
-      {id:'Tempura Courgettes (Saver)', name:'Tempura Courgettes', src:'sv', desc:"Goat's cheese dip (V, GF)"},
-      {id:'Mini Mezze Board (Saver)', name:'Mini Mezze Board', src:'sv', desc:'Toasted sourdough, mixed olives, sunblushed tomatoes, balsamic reduction & olive oil (V, VE, GF*)'},
-      {id:'Burrata (Saver)', name:'Burrata', src:'sv', desc:'Basil pesto, toasted pine nuts & basil oil (V)'},
-      {id:'Soup of the Day (Saver)', name:'Soup of the Day', src:'sv', desc:'With crusty ciabatta & rock salt butter (V, GF*)'},
-      {id:'Shetland Mussels (Saver)', name:'Shetland Mussels', src:'sv', desc:'In a white wine cream & garlic sauce & sourdough'},
-      {id:'Cheese Loaded Potato Skins (Saver)', name:'Cheese Loaded Potato Skins', src:'sv', desc:'Sweet chilli dip (V, GF*)'},
-      {id:'Homemade Black Pudding Fritta (Saver)', name:'Homemade Black Pudding Fritta', src:'sv', desc:"Poached hen's egg, real ale syrup & crispy onions"}
+    { group: 'Small plates & starters', items: [
+      {name:'Burrata', v:[SV(), MM(750)], desc:'Basil pesto, toasted pine nuts & basil oil (V)'},
+      {name:'Tempura Courgettes', v:[SV(), MM(750)], desc:"Goat's cheese dip (V, VE, GF)"},
+      {name:'Cheese Loaded Potato Skins', v:[SV(), MM(750)], desc:'Sweet chilli dip (V, GF*)'},
+      {name:'Homemade Black Pudding Fritta', v:[SV(), MM(750)], desc:"Poached hen's egg, real ale syrup & crispy onions"},
+      {name:'Soup of the Day', v:[SV()], desc:'With crusty ciabatta & rock salt butter (V, GF*)'},
+      {name:'Mini Mezze Board', v:[SV()], desc:'Toasted sourdough, mixed olives, sunblushed tomatoes, balsamic reduction & olive oil (V, VE, GF*)'},
+      {name:'Shetland Mussels', v:[SV()], desc:'In a white wine cream & garlic sauce & sourdough'},
+      {name:'Monkfish Cheek "Scampi"', v:[MM(750)], desc:'Small plate. Tarragon mayonnaise'},
+      {name:'Mezze Board', v:[MM(750)], desc:'Small plate. Hummus, olives, flatbread, olive oil (V, VE)'},
+      {name:'Classic Shetland Moules Marinière', v:[MM(750)], desc:'Small plate'},
+      {name:'Braised Pig Cheek Tostada', v:[MM(750)], desc:'Small plate. Celeriac, Granny Smith apple'},
+      {name:'Prawn Toast', v:[MM(750)], desc:'Small plate. Sweet chilli dipping sauce'},
+      {name:'Polenta Chips', v:[MM(750)], desc:'Small plate. Parmesan & truffle (V, VE, GF)'},
+      {name:'Ham Hock Terrine', v:[MM(750)], desc:'Small plate. Pickled vegetables & Dijon mayonnaise (GF)'},
+      {name:'Garlic Bread with Mozzarella', v:[MM(995)], desc:'12-inch wood-fired sourdough'}
     ]}
   ],
   mains: [
-    { group: CF_GROUP, items: [
-      {name:'Traditional Roast Turkey', cf:1, desc:'Turkey leg & cranberry ballotine, pigs in blankets, Yorkshire pudding & all the trimmings'},
-      {name:'Fillet of Beef Wellington', cf:1, supp:300, short:'Beef Wellington', desc:'Spinach, wild mushroom duxelles, Parma ham, glazed orange and cardamom carrots, creamed mash, braised hispi & port wine jus'},
-      {name:'Confit Duck Leg', cf:1, desc:'Braised red cabbage, Puy lentil cassoulet & tenderstem broccoli'},
-      {name:'Oven Roast Cod', cf:1, desc:'Wild mushrooms, spinach, samphire, ratte potato mousse, brown shrimp, mustard mayo, panko crumb & pickled cucumbers'},
-      {name:'Roasted Cauliflower & Caramelised Onion Gnocchi', cf:1, desc:'Served in a rich crème fraîche sauce & herb infused panko crumb'}
+    { group: FAYRE_GROUP, items: [
+      {name:'Traditional Roast Turkey', v:[CF()], desc:'Turkey leg & cranberry ballotine, pigs in blankets, Yorkshire pudding & all the trimmings'},
+      {name:'Fillet of Beef Wellington', v:[CF({supp:300})], short:'Beef Wellington', desc:'Spinach, wild mushroom duxelles, Parma ham, glazed orange and cardamom carrots, creamed mash, braised hispi & port wine jus'},
+      {name:'Confit Duck Leg', v:[CF()], desc:'Braised red cabbage, Puy lentil cassoulet & tenderstem broccoli'},
+      {name:'Oven Roast Cod', v:[CF()], desc:'Wild mushrooms, spinach, samphire, ratte potato mousse, brown shrimp, mustard mayo, panko crumb & pickled cucumbers'},
+      {name:'Roasted Cauliflower & Caramelised Onion Gnocchi', v:[CF()], desc:'Served in a rich crème fraîche sauce & herb infused panko crumb'}
     ]},
-    { group: 'Main menu: classics', items: [
-      {name:'8oz Cheeseburger', price:1795, desc:'Baby gem lettuce, tomato, Monterey Jack smoked cheese, BBQ sauce, garlic mayo, coleslaw & seasoned fries'},
-      {name:'Classic Chicken Parmo', price:1825, desc:'Béchamel, house cheese blend, salad, chunky chips & garlic mayo'},
-      {name:'Classic Chicken Parmo with Hot Shot', price:2125, desc:'Parmo topped with jalapeños, pepperoni & onion (hot shot +£3)'},
-      {name:'Fish & Chips', price:1825, desc:'Beer battered cod & chips, lemon & tartare sauce, bread & butter'},
-      {name:'Whitby Scampi', price:1725, desc:'8 pieces of Whitby scampi, chunky chips, lemon, tartare sauce'},
-      {name:'Chicken Caesar Salad', price:1695, desc:'Chicken, cos lettuce, sourdough croutons, parmesan cheese & Caesar dressing'}
+    { group: 'Classics', items: [
+      {name:'8oz Cheeseburger', v:[SV(), MM(1795)], desc:'Baby gem lettuce, tomato, Monterey Jack smoked cheese, BBQ sauce, garlic mayo, coleslaw & seasoned fries'},
+      {name:'Fish & Chips', v:[SV('10oz cod fillet, chunky chips, mushy peas & homemade tartare sauce'), MM(1825, 'Beer battered cod & chips, lemon & tartare sauce, bread & butter')], desc:'Beer battered cod & chips, lemon & tartare sauce, bread & butter'},
+      {name:'Classic Chicken Parmo', v:[MM(1825)], desc:'Béchamel, house cheese blend, salad, chunky chips & garlic mayo'},
+      {name:'Classic Chicken Parmo with Hot Shot', v:[MM(2125)], desc:'Parmo topped with jalapeños, pepperoni & onion (hot shot +£3)'},
+      {name:'Whitby Scampi', v:[MM(1725)], desc:'8 pieces of Whitby scampi, chunky chips, lemon, tartare sauce'},
+      {name:'Chicken Caesar Salad', v:[MM(1695), LN(1695)], desc:'Chicken, cos lettuce, sourdough croutons, parmesan cheese & Caesar dressing'}
     ]},
-    { group: 'Main menu: the grill (served with two sides)', items: [
-      {name:'8oz Fillet Steak', price:3195, steak:1, desc:'A classic centre cut fillet, exceptionally tender (GF)'},
-      {name:'10oz Ribeye Steak', price:2795, steak:1, desc:'Richly marbled for maximum flavour (GF)'},
-      {name:'10oz Sirloin Steak', price:2895, steak:1, desc:'Most popular cut (GF)'},
-      {name:'8oz Bistro Rump Steak', price:2295, steak:1, desc:'A leaner cut with bold, beefy character (GF)'}
+    { group: 'From the grill (served with two sides)', items: [
+      {name:'8oz Fillet Steak', v:[MM(3195)], steak:1, desc:'A classic centre cut fillet, exceptionally tender (GF)'},
+      {name:'10oz Ribeye Steak', v:[MM(2795)], steak:1, desc:'Richly marbled for maximum flavour (GF)'},
+      {name:'10oz Sirloin Steak', v:[MM(2895)], steak:1, desc:'Most popular cut (GF)'},
+      {name:'8oz Bistro Rump Steak', v:[MM(2295)], steak:1, desc:'A leaner cut with bold, beefy character (GF)'}
     ]},
-    { group: "Main menu: head chef's recommendation", items: [
-      {name:'Monkfish Wrapped in Parma Ham', price:2850, desc:'Fondant potato, braised hispi cabbage, miso velouté, keta roe & dill oil (GF)'},
-      {name:'Duo of Lamb', price:2995, desc:'4oz lamb rump, braised lamb shoulder, courgette & basil purée, broad beans, cabbage, garden peas, pan juices & rosemary new potatoes (GF)'}
+    { group: "Head chef's recommendation", items: [
+      {name:'Monkfish Wrapped in Parma Ham', v:[MM(2850)], desc:'Fondant potato, braised hispi cabbage, miso velouté, keta roe & dill oil (GF)'},
+      {name:'Duo of Lamb', v:[MM(2995)], desc:'4oz lamb rump, braised lamb shoulder, courgette & basil purée, broad beans, cabbage, garden peas, pan juices & rosemary new potatoes (GF)'}
     ]},
-    { group: 'Main menu: 12-inch sourdough pizzas', items: [
-      {name:'Margherita Pizza', price:1095, desc:'Mozzarella, basil & tomato base. Gluten free base on request'},
-      {name:'Meat Feast Pizza', price:1295, desc:'Pepperoni, sliced sausage, ham hock, mozzarella & hot honey drizzle. Gluten free base on request'},
-      {name:'Pepperoni Pizza', price:1295, desc:'Mozzarella, tomato base & cured pepperoni slices. Gluten free base on request'},
-      {name:'Ham Hock & Dijon Mayo Pizza', price:1295, desc:'Tomato base, pulled ham hock, Dijon mayo & mozzarella. Gluten free base on request'},
-      {name:'The Mediterranean Pizza', price:1295, desc:"Goat's cheese, Mediterranean vegetables, basil pesto, tomato base & mozzarella. Gluten free base on request"}
+    { group: '12-inch sourdough pizzas', items: [
+      {name:'Margherita Pizza', v:[MM(1095)], desc:'Mozzarella, basil & tomato base. Gluten free base on request'},
+      {name:'Meat Feast Pizza', v:[MM(1295)], desc:'Pepperoni, sliced sausage, ham hock, mozzarella & hot honey drizzle. Gluten free base on request'},
+      {name:'Pepperoni Pizza', v:[MM(1295)], desc:'Mozzarella, tomato base & cured pepperoni slices. Gluten free base on request'},
+      {name:'Ham Hock & Dijon Mayo Pizza', v:[MM(1295)], desc:'Tomato base, pulled ham hock, Dijon mayo & mozzarella. Gluten free base on request'},
+      {name:'The Mediterranean Pizza', v:[MM(1295)], desc:"Goat's cheese, Mediterranean vegetables, basil pesto, tomato base & mozzarella. Gluten free base on request"}
     ]},
-    { group: SV_GROUP, items: [
-      {id:'Moules & Frites (Saver)', name:'Moules & Frites', src:'sv', desc:'Shetland mussels in a white wine cream & garlic sauce, skin on fries & sourdough slice'},
-      {id:'Scampi (Saver)', name:'Scampi', src:'sv', desc:'8 pieces of succulent scampi, chunky chips & homemade tartare sauce'},
-      {id:'Fish & Chips (Saver)', name:'Fish & Chips', src:'sv', desc:'10oz cod fillet, chunky chips, mushy peas & homemade tartare sauce'},
-      {id:'Chicken & Pepper Shawarma Flatbread (Saver)', name:'Marinated Chicken & Pepper Shawarma Flatbread', src:'sv', desc:'Garlic mayo, rocket, pickled vegetables, finished with pomegranate seeds & skin on fries'},
-      {id:'Homemade Chicken Parmesan (Saver)', name:'Homemade Chicken Parmesan', src:'sv', desc:'Chicken breast in panko breadcrumbs, roast garlic mayo, béchamel sauce, duo of cheddar & mozzarella, skin on fries & house salad'},
-      {id:'8oz Bistro Rump Steak (Saver)', name:'8oz Bistro Rump Steak', src:'sv', cookOnly:1, desc:'Flat cap mushroom, thyme infused tomato, hand cut chunky chips & house salad (GF)'},
-      {id:'Caesar Salad (Saver)', name:'Caesar Salad', src:'sv', desc:'Baby gem lettuce, garlic croutons, parmesan & Caesar dressing'},
-      {id:'8oz Cheeseburger (Saver)', name:'8oz Cheeseburger', src:'sv', desc:'Baby gem lettuce, tomato, Monterey Jack smoked cheese, BBQ sauce, garlic mayo, coleslaw & seasoned fries'}
+    { group: 'Saver menu', items: [
+      {name:'Scampi', v:[SV()], desc:'8 pieces of succulent scampi, chunky chips & homemade tartare sauce'},
+      {name:'Homemade Chicken Parmesan', v:[SV()], desc:'Chicken breast in panko breadcrumbs, roast garlic mayo, béchamel sauce, duo of cheddar & mozzarella, skin on fries & house salad'},
+      {name:'8oz Bistro Rump Steak with mushroom, tomato & chips', v:[SV()], cookOnly:1, desc:'Flat cap mushroom, thyme infused tomato, hand cut chunky chips & house salad (GF)'},
+      {name:'Caesar Salad', v:[SV()], desc:'Baby gem lettuce, garlic croutons, parmesan & Caesar dressing'}
     ]},
-    { group: 'Lunch menu', items: [
-      {id:'Open Sourdough Steak Sandwich (Lunch)', name:'Open Sourdough Chargrilled Steak Sandwich', src:'ln', price:1750, desc:'Caramelised onion jam, rocket & parmesan salad, dipping jus, served with chunky chips'},
-      {id:'Sourdough Prawn & Marie Rose Sandwich (Lunch)', name:'Sourdough Prawn & Marie Rose Sandwich', src:'ln', price:1695, desc:'Iceberg lettuce, house salad & chunky chips'},
-      {id:'The Mediterranean Sourdough (Lunch)', name:'The Mediterranean (sourdough)', src:'ln', price:1550, desc:"Sourdough, goat's cheese, Mediterranean vegetables, basil pesto & toasted pine nuts (V)"},
-      {id:'Chicken & Pepper Shawarma Flatbread (Lunch)', name:'Marinated Chicken & Pepper Shawarma Flatbread', src:'ln', price:1595, desc:'Garlic mayo, rocket, pickled vegetables, finished with pomegranate seeds & skin on fries'},
-      {id:'Posh Fish Finger Sandwich (Lunch)', name:'Posh Fish Finger Sandwich', src:'ln', price:1550, desc:'Sourdough bun, battered cod goujons, tartare sauce, lemon & chunky chips'},
-      {id:'Moules & Frites (Lunch)', name:'Moules & Frites', src:'ln', price:1695, desc:'Shetland mussels in a white wine cream & garlic sauce, skin on fries & sourdough slice'},
-      {id:'Chicken Caesar Salad (Lunch)', name:'Chicken Caesar Salad', src:'ln', price:1695, desc:'Chicken breast, baby gem lettuce, garlic croutons, parmesan & Caesar dressing'}
+    { group: 'Lunch & light bites', items: [
+      {name:'Moules & Frites', v:[SV(), LN(1695)], desc:'Shetland mussels in a white wine cream & garlic sauce, skin on fries & sourdough slice'},
+      {name:'Marinated Chicken & Pepper Shawarma Flatbread', v:[SV(), LN(1595)], desc:'Garlic mayo, rocket, pickled vegetables, finished with pomegranate seeds & skin on fries'},
+      {name:'Open Sourdough Chargrilled Steak Sandwich', v:[LN(1750)], desc:'Caramelised onion jam, rocket & parmesan salad, dipping jus, served with chunky chips'},
+      {name:'Sourdough Prawn & Marie Rose Sandwich', v:[LN(1695)], desc:'Iceberg lettuce, house salad & chunky chips'},
+      {name:'The Mediterranean Sourdough', v:[LN(1550)], desc:"Sourdough, goat's cheese, Mediterranean vegetables, basil pesto & toasted pine nuts (V)"},
+      {name:'Posh Fish Finger Sandwich', v:[LN(1550)], desc:'Sourdough bun, battered cod goujons, tartare sauce, lemon & chunky chips'}
     ]}
   ],
   desserts: [
-    { group: CF_GROUP, items: [
-      {name:'Sticky Toffee Pudding', cf:1, desc:'Butterscotch sauce & vanilla pod ice cream'},
-      {name:'Double Chocolate Brownie', cf:1, desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
-      {name:'Traditional Christmas Pudding', cf:1, desc:'Brandy sauce & redcurrants'},
-      {name:'Espresso Crème Brûlée', cf:1, desc:'Homemade shortbread'},
-      {name:'Artisan Cheeseboard', cf:1, supp:300, short:'Cheeseboard', desc:'Brie, cheddar, Yorkshire blue, selection of biscuits, chutney, grapes & celery'},
-      {name:'Spiced Poached Pear Cheesecake', cf:1, desc:'Vanilla pod ice cream'}
+    { group: FAYRE_GROUP, items: [
+      {name:'Sticky Toffee Pudding', v:[CF({desc:'Butterscotch sauce & vanilla pod ice cream'}), SV('Butterscotch sauce & salted caramel ice cream'), MM(700, 'Butterscotch sauce & salted caramel ice cream')], desc:'Butterscotch sauce & ice cream'},
+      {name:'Chocolate Brownie', v:[CF({desc:'Double chocolate brownie, chocolate sauce, vanilla ice cream & seasonal berries'}), SV(), MM(700)], desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
+      {name:'Traditional Christmas Pudding', v:[CF()], desc:'Brandy sauce & redcurrants'},
+      {name:'Espresso Crème Brûlée', v:[CF()], desc:'Homemade shortbread'},
+      {name:'Artisan Cheeseboard', v:[CF({supp:300})], short:'Cheeseboard', desc:'Brie, cheddar, Yorkshire blue, selection of biscuits, chutney, grapes & celery'},
+      {name:'Spiced Poached Pear Cheesecake', v:[CF()], desc:'Vanilla pod ice cream'}
     ]},
-    { group: 'Main menu: desserts', items: [
-      {name:'Sticky Toffee Pudding (salted caramel ice cream)', price:700, desc:'Butterscotch sauce & salted caramel ice cream'},
-      {name:'Chocolate Brownie', price:700, desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
-      {name:'Lemon Tiramisu', price:700, desc:'Limoncello syrup, lemon-infused mascarpone & lemon curd'},
-      {name:'Apple Frangipane Bakewell Tart', price:700, desc:'Served with crème anglaise'},
-      {name:'Knickerbocker Glory', price:700, desc:'Chocolate sauce, wafer, brownie pieces & marshmallows (GF*)'},
-      {name:'Cheesecake of the Day', price:700, desc:'Vanilla pod ice cream or pouring cream'}
-    ]},
-    { group: SV_GROUP, items: [
-      {id:'Sticky Toffee Pudding (Saver)', name:'Sticky Toffee Pudding', src:'sv', desc:'Butterscotch sauce & salted caramel ice cream'},
-      {id:'Chocolate Brownie (Saver)', name:'Chocolate Brownie', src:'sv', desc:'Chocolate sauce, vanilla ice cream & seasonal berries'},
-      {id:'Lemon Tiramisu (Saver)', name:'Lemon Tiramisu', src:'sv', desc:'Limoncello syrup, lemon-infused mascarpone & lemon curd'},
-      {id:'Apple Frangipane Bakewell Tart (Saver)', name:'Apple Frangipane Bakewell Tart', src:'sv', desc:'Served with crème anglaise'},
-      {id:'Selection of Ice Creams (Saver)', name:'Selection of Ice Creams', src:'sv', desc:'With chocolate sauce & wafer'},
-      {id:'Cheesecake of the Day (Saver)', name:'Cheesecake of the Day', src:'sv', desc:'Vanilla pod ice cream'}
+    { group: 'More desserts', items: [
+      {name:'Lemon Tiramisu', v:[SV(), MM(700)], desc:'Limoncello syrup, lemon-infused mascarpone & lemon curd'},
+      {name:'Apple Frangipane Bakewell Tart', v:[SV(), MM(700)], desc:'Served with crème anglaise'},
+      {name:'Cheesecake of the Day', v:[SV('Vanilla pod ice cream'), MM(700, 'Vanilla pod ice cream or pouring cream')], desc:'Vanilla pod ice cream or pouring cream'},
+      {name:'Knickerbocker Glory', v:[MM(700)], desc:'Chocolate sauce, wafer, brownie pieces & marshmallows (GF*)'},
+      {name:'Selection of Ice Creams', v:[SV()], desc:'With chocolate sauce & wafer'}
     ]}
   ]
 };
@@ -496,56 +498,87 @@ const SIDES = ['Smoked Mac & Cheese', 'Charred Tenderstem Broccoli', 'Green Bean
 const SAUCES = ['Peppercorn', 'Diane', 'Garlic Butter'];
 const COOK = ['Blue', 'Rare', 'Medium rare', 'Medium', 'Medium well', 'Well done'];
 const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert'};
-const NO_EXTRA = 'No extra side', NO_SAUCE = 'No sauce';
+const SRC_NAME = { cf: 'Christmas Fayre', mm: 'Main menu', sv: 'Saver menu', ln: 'Lunch menu' };
+/* names used by earlier versions of this page */
+const ALIASES = {
+  'Double Chocolate Brownie': 'Chocolate Brownie',
+  'Sticky Toffee Pudding (salted caramel ice cream)': 'Sticky Toffee Pudding',
+  '8oz Bistro Rump Steak (Saver)': '8oz Bistro Rump Steak with mushroom, tomato & chips',
+  'Chicken & Pepper Shawarma Flatbread (Saver)': 'Marinated Chicken & Pepper Shawarma Flatbread',
+  'Chicken & Pepper Shawarma Flatbread (Lunch)': 'Marinated Chicken & Pepper Shawarma Flatbread',
+  'Open Sourdough Steak Sandwich (Lunch)': 'Open Sourdough Chargrilled Steak Sandwich',
+  'The Mediterranean Sourdough (Lunch)': 'The Mediterranean Sourdough'
+};
 
 const $ = id => document.getElementById(id);
 const LIVE = /^https:\/\/script\.google\.com\//.test(CONFIG.SCRIPT_URL);
 const byName = {};
-const val = d => d.id || d.name;
 ['starters', 'mains', 'desserts'].forEach(k => MENU[k].forEach(g => g.items.forEach(d => {
-  d.src = d.src || (d.cf ? 'cf' : 'mm');
-  if (byName[val(d)]) throw new Error('Duplicate dish: ' + val(d));
-  byName[val(d)] = d;
+  if (byName[d.name]) throw new Error('Duplicate dish: ' + d.name);
+  byName[d.name] = d;
 })));
-const SRC_NAME = { cf: 'Christmas Fayre', mm: 'Main menu', sv: 'Saver menu', ln: 'Lunch menu' };
+const dishOf = n => n ? (byName[n] || byName[ALIASES[n]] || byName[String(n).replace(/ \((Saver|Lunch)\)$/, '')] || null) : null;
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = p => '£' + (p / 100).toFixed(2);
+const short = p => money(p).replace('.00', '');
 const isReal = v => !!v && !Object.values(NONE).includes(v);
-const optText = d => d.name + (d.src === 'cf' ? ' · Christmas Fayre' + (d.supp ? ' +' + money(d.supp).replace('.00', '') : '')
-  : d.src === 'sv' ? ' · Saver menu' : ' · ' + money(d.price));
-const tagText = d => d.src === 'cf' ? '🎄 Christmas Fayre' + (d.supp ? ' (+' + money(d.supp).replace('.00', '') + ' supplement)' : '')
-  : d.src === 'sv' ? 'Saver menu, set price (not part of the Christmas Fayre)'
-  : SRC_NAME[d.src] + ' · ' + money(d.price) + ' (not part of the Christmas Fayre)';
+const listOf = x => Array.isArray(x) ? x.filter(Boolean) : String(x || '').split(', ').map(s => s.trim()).filter(Boolean);
+
+function variantLabel(x){ return x.src === 'cf' ? 'Christmas Fayre' + (x.supp ? ' +' + short(x.supp) : '') : x.src === 'sv' ? 'Saver' : money(x.price); }
+function optText(d){ return d.name + ' · ' + [...new Set(d.v.map(variantLabel))].join(' / '); }
+function tagFor(d, x){
+  if (x.src === 'cf') return '🎄 Christmas Fayre' + (x.supp ? ' (+' + short(x.supp) + ' supplement)' : '');
+  if (x.src === 'sv') return 'Saver menu, set price (not part of the Christmas Fayre)';
+  return SRC_NAME[x.src] + ' · ' + money(x.price) + ' (not part of the Christmas Fayre)';
+}
 
 /* ---------------- pricing ---------------- */
-function courseCount(o){ return [o.starter, o.main, o.dessert].filter(isReal).length; }
-function isSteak(o){ const d = byName[o.main]; return o.mainType === 'main' && !!(d && d.steak); }
-function needsCook(o){ const d = byName[o.main]; return o.mainType === 'main' && !!(d && (d.steak || d.cookOnly)); }
+function courseCount(o){ return [o.starter, o.mainType === 'none' ? '' : o.main, o.dessert].filter(isReal).length; }
+function isSteak(o){ const d = dishOf(o.main); return o.mainType === 'main' && !!(d && d.steak); }
+function needsCook(o){ const d = dishOf(o.main); return o.mainType === 'main' && !!(d && (d.steak || d.cookOnly)); }
 function steakText(o){
   if (!needsCook(o)) return '';
   if (!isSteak(o)) return o.cook || '';
-  const bits = [o.cook, [o.side1, o.side2].filter(Boolean).join(' & ')];
-  if (o.extraSide && o.extraSide !== NO_EXTRA) bits.push('extra side: ' + o.extraSide);
-  if (o.sauce && o.sauce !== NO_SAUCE) bits.push(o.sauce + ' sauce');
-  return bits.filter(Boolean).join(', ');
+  return [o.cook, [o.side1, o.side2].filter(Boolean).join(' & ')].filter(Boolean).join(', ');
 }
-function priceOf(o){
-  const picks = [o.starter, o.main, o.dessert].filter(isReal).map(n => byName[n]).filter(Boolean);
-  if (!picks.length) return null;
+function extrasOf(o){
+  let sides = listOf(o.extraSides), sauces = listOf(o.sauces);
+  if (!sides.length && o.extraSide && o.extraSide !== 'No extra side') sides = [o.extraSide];   // older orders
+  if (!sauces.length && o.sauce && o.sauce !== 'No sauce') sauces = [o.sauce];
+  return { sides, sauces };
+}
+function picksOf(o){
+  return [['starter', o.starter], ['main', o.mainType === 'none' ? '' : o.main], ['dessert', o.dessert]]
+    .filter(([, n]) => isReal(n) && dishOf(n)).map(([c, n]) => ({course: c, d: dishOf(n)}));
+}
+function costOf(combo){
   const lines = [];
   Object.keys(SETS).forEach(k => {
-    const n = picks.filter(d => d.src === k).length, S = SETS[k];
+    const n = combo.filter(c => c.x.src === k).length, S = SETS[k];
     if (n) lines.push([n === 1 ? S.label + ', 1 course (charged at the 2-course price)' : S.label + ', ' + n + ' courses', n >= 3 ? S.three : S.two]);
   });
-  const mainD = byName[o.main], dessD = byName[o.dessert];
-  if (o.mainType === 'main' && mainD && mainD.src === 'cf' && mainD.supp) lines.push([mainD.short + ' supplement', mainD.supp]);
-  if (dessD && dessD.src === 'cf' && dessD.supp) lines.push([dessD.short + ' supplement', dessD.supp]);
-  [o.starter, o.main, o.dessert].forEach(n => { const d = isReal(n) && byName[n]; if (d && !SETS[d.src]) lines.push([d.name + (d.src === 'ln' ? ' (lunch menu)' : ''), d.price]); });
-  if (isSteak(o)){
-    if (o.extraSide && o.extraSide !== NO_EXTRA) lines.push(['Extra side: ' + o.extraSide, EXTRA_SIDE]);
-    if (o.sauce && o.sauce !== NO_SAUCE) lines.push([o.sauce + ' sauce', SAUCE]);
-  }
-  return { lines, total: lines.reduce((a, l) => a + l[1], 0) };
+  combo.forEach(c => { if (c.x.supp) lines.push([c.d.short + ' supplement', c.x.supp]); });
+  combo.forEach(c => { if (!SETS[c.x.src]) lines.push([c.d.name + (c.x.src === 'ln' ? ' (lunch menu)' : ''), c.x.price]); });
+  return lines;
+}
+/* Tries every way of counting each dish against the menus it's on and keeps the cheapest. */
+function priceOf(o){
+  const picks = picksOf(o);
+  if (!picks.length) return null;
+  let best = null;
+  (function walk(i, combo){
+    if (i === picks.length){
+      const lines = costOf(combo), total = lines.reduce((a, l) => a + l[1], 0);
+      if (!best || total < best.total) best = { lines, total, combo: combo.slice() };
+      return;
+    }
+    picks[i].d.v.forEach(x => { combo.push({course: picks[i].course, d: picks[i].d, x}); walk(i + 1, combo); combo.pop(); });
+  })(0, []);
+  const ex = extrasOf(o), lines = best.lines.slice();
+  ex.sides.forEach(s => lines.push(['Extra side: ' + s, SIDE_PRICE]));
+  ex.sauces.forEach(s => lines.push([s + ' sauce', SAUCE_PRICE]));
+  const chosen = {}; best.combo.forEach(c => chosen[c.course] = c.x);
+  return { lines, total: lines.reduce((a, l) => a + l[1], 0), chosen };
 }
 function billHtml(o){
   const p = priceOf(o);
@@ -561,7 +594,7 @@ function fillGrouped(sel, groups, placeholder, noneText){
   if (noneText) sel.add(new Option(noneText, noneText));
   groups.forEach(g => {
     const og = document.createElement('optgroup'); og.label = g.group;
-    g.items.forEach(d => og.appendChild(new Option(optText(d), val(d))));
+    g.items.forEach(d => og.appendChild(new Option(optText(d), d.name)));
     sel.appendChild(og);
   });
 }
@@ -570,6 +603,10 @@ function fillPlain(sel, items, placeholder){
   if (placeholder){ const ph = new Option(placeholder, ''); ph.disabled = true; ph.selected = true; sel.add(ph); }
   items.forEach(v => sel.add(new Option(v, v)));
 }
+function fillChecks(box, name, items){
+  box.innerHTML = items.map(v => '<label class="chk"><input type="checkbox" name="' + name + '" value="' + esc(v) + '"><span>' + esc(v) + '</span></label>').join('');
+}
+const checked = name => [...document.querySelectorAll('input[name=' + name + ']:checked')].map(i => i.value);
 function mainType(){ const r = document.querySelector('input[name=mainType]:checked'); return r ? r.value : ''; }
 function setMainList(){
   const t = mainType(), sel = $('main'), keep = sel.value;
@@ -582,12 +619,18 @@ function setMainList(){
 }
 function showDesc(k){
   const d = byName[$(k).value];
-  $('d-' + k).textContent = d ? d.desc : '';
-  const t = $('t-' + k);
-  t.className = 'tag' + (d ? (d.cf ? ' cf' : ' mm') : '');
-  t.textContent = d ? tagText(d) : '';
   $('w-' + k + 'Req').hidden = !d;
   if (k === 'main'){ const o = currentOrder(); $('steakBox').hidden = !needsCook(o); $('sidesBox').hidden = !isSteak(o); }
+}
+/* tags and descriptions depend on the whole order, because shared dishes count against the cheapest menu */
+function updateTags(o, p){
+  ['starter', 'main', 'dessert'].forEach(k => {
+    const n = k === 'main' && o.mainType === 'none' ? '' : o[k], d = isReal(n) ? dishOf(n) : null, t = $('t-' + k);
+    const x = d ? ((p && p.chosen[k]) || d.v[0]) : null;
+    t.className = 'tag' + (x ? (x.src === 'cf' ? ' cf' : ' mm') : '');
+    t.textContent = x ? tagFor(d, x) : '';
+    $('d-' + k).textContent = d ? (x.desc || d.desc) : '';
+  });
 }
 function reqOf(k){ return byName[$(k).value] ? $(k + 'Req').value.trim() : ''; }
 function currentOrder(){
@@ -598,19 +641,19 @@ function currentOrder(){
     dessert: $('dessert').value, notes: $('notes').value.trim(),
     starterReq: reqOf('starter'), mainReq: t === 'none' ? '' : reqOf('main'), dessertReq: reqOf('dessert'),
     cook: $('cook').value, side1: $('side1').value, side2: $('side2').value,
-    extraSide: $('extraSide').value, sauce: $('sauce').value,
+    extraSides: checked('xside'), sauces: checked('xsauce'),
     website: $('website').value
   };
 }
 function payload(o){
-  const steak = isSteak(o);
-  const p = priceOf(o);
+  const steak = isSteak(o), p = priceOf(o);
   return {
     action: 'submit', name: o.name, email: o.email, mainType: o.mainType,
     starter: o.starter, main: o.main, dessert: o.dessert, notes: o.notes,
     starterReq: o.starterReq, mainReq: o.mainReq, dessertReq: o.dessertReq,
     cook: needsCook(o) ? o.cook : '', side1: steak ? o.side1 : '', side2: steak ? o.side2 : '',
-    extraSide: steak && o.extraSide !== NO_EXTRA ? o.extraSide : '', sauce: steak && o.sauce !== NO_SAUCE ? o.sauce : '',
+    extraSides: o.extraSides.join(', '), sauces: o.sauces.join(', '),
+    menus: p ? ['starter', 'main', 'dessert'].filter(k => p.chosen[k]).map(k => k + ': ' + SRC_NAME[p.chosen[k].src]).join(', ') : '',
     bill: p ? { lines: p.lines, total: p.total } : null,
     summary: summaryLines(o),
     website: o.website
@@ -622,11 +665,14 @@ function mainText(o){
 }
 /* [label, value] lines used on screen and in the email */
 function summaryLines(o){
+  const ex = extrasOf(o);
   const rows = [['Starter', o.starter]];
   if (o.starterReq) rows.push(['Starter request', o.starterReq]);
   rows.push(['Main', o.mainType ? mainText(o) : '']);
   const st = steakText(o); if (st) rows.push(['Steak', st]);
   if (o.mainReq) rows.push(['Main request', o.mainReq]);
+  if (ex.sides.length) rows.push(['Extra sides', ex.sides.join(', ')]);
+  if (ex.sauces.length) rows.push(['Sauces', ex.sauces.join(', ')]);
   rows.push(['Dessert', o.dessert]);
   if (o.dessertReq) rows.push(['Dessert request', o.dessertReq]);
   if (o.notes) rows.push(['Allergies / dietary needs', o.notes]);
@@ -640,9 +686,12 @@ function listHtml(o, showEmpty){
   }).join('');
 }
 function renderSummary(){
-  const o = currentOrder();
+  const o = currentOrder(), p = priceOf(o);
+  updateTags(o, p);
   $('sumList').innerHTML = listHtml(o, true);
   $('sumBill').innerHTML = billHtml(o);
+  const n = o.extraSides.length + o.sauces.length;
+  $('extrasCount').textContent = n ? '(' + n + ' added)' : '(optional)';
 }
 function setInvalid(id, bad){ $(id).classList.toggle('invalid', !!bad); return !bad; }
 function validate(o){
@@ -707,10 +756,15 @@ function restore(){
   const r = document.querySelector('input[name=mainType][value="' + o.mainType + '"]'); if (r) r.checked = true;
   setMainList();
   const setIf = (id, v) => { if (v && [...$(id).options].some(x => x.value === v)) $(id).value = v; };
-  ['starter', 'dessert'].forEach(k => { setIf(k, o[k]); showDesc(k); });
-  ['cook', 'side1', 'side2', 'extraSide', 'sauce'].forEach(k => setIf(k, o[k]));
-  if (o.main && o.mainType !== 'none') { setIf('main', o.main); showDesc('main'); }
+  const fix = v => { const d = dishOf(v); return d ? d.name : v; };
+  ['starter', 'dessert'].forEach(k => { setIf(k, fix(o[k])); showDesc(k); });
+  ['cook', 'side1', 'side2'].forEach(k => setIf(k, o[k]));
+  if (o.main && o.mainType !== 'none') { setIf('main', fix(o.main)); showDesc('main'); }
   ['starter', 'main', 'dessert'].forEach(k => { $(k + 'Req').value = o[k + 'Req'] || ''; });
+  const ex = extrasOf(o);
+  document.querySelectorAll('input[name=xside]').forEach(i => { i.checked = ex.sides.includes(i.value); });
+  document.querySelectorAll('input[name=xsauce]').forEach(i => { i.checked = ex.sauces.includes(i.value); });
+  if (ex.sides.length || ex.sauces.length) $('extrasBox').open = true;
 }
 function initGuest(){
   if (!LIVE) $('demoBanner').hidden = false;
@@ -719,11 +773,12 @@ function initGuest(){
   fillPlain($('cook'), COOK, 'Choose…');
   fillPlain($('side1'), SIDES, 'Choose a side…');
   fillPlain($('side2'), SIDES, 'Choose a side…');
-  fillPlain($('extraSide'), [NO_EXTRA].concat(SIDES));
-  fillPlain($('sauce'), [NO_SAUCE].concat(SAUCES));
+  fillChecks($('sideChecks'), 'xside', SIDES);
+  fillChecks($('sauceChecks'), 'xsauce', SAUCES);
   document.querySelectorAll('input[name=mainType]').forEach(r => r.addEventListener('change', () => { setMainList(); setInvalid('f-mainType', false); renderSummary(); }));
   ['starter', 'main', 'dessert'].forEach(k => $(k).addEventListener('change', () => { showDesc(k); setInvalid('f-' + k, false); setInvalid('f-any', false); renderSummary(); }));
-  ['cook', 'side1', 'side2', 'extraSide', 'sauce'].forEach(k => $(k).addEventListener('change', () => { if ($('f-' + k)) setInvalid('f-' + k, false); renderSummary(); }));
+  ['cook', 'side1', 'side2'].forEach(k => $(k).addEventListener('change', () => { setInvalid('f-' + k, false); renderSummary(); }));
+  $('extrasBox').addEventListener('change', renderSummary);
   ['name', 'email'].forEach(k => $(k).addEventListener('input', () => { setInvalid('f-' + k, false); renderSummary(); }));
   $('notes').addEventListener('input', renderSummary);
   ['starterReq', 'mainReq', 'dessertReq'].forEach(k => $(k).addEventListener('input', renderSummary));
@@ -764,10 +819,10 @@ let ADMIN_ROWS = [];
 function sampleRows(){
   return [
     {name:'Sample Guest A', starter:'Roasted Celeriac Velouté', mainType:'main', main:'Traditional Roast Turkey', dessert:'Sticky Toffee Pudding', notes:''},
-    {name:'Sample Guest B', starter:'Burrata', mainType:'main', main:'10oz Ribeye Steak', dessert:'Lemon Tiramisu', notes:'', cook:'Medium rare', side1:'Chunky Chips', side2:'Onion Rings', extraSide:'', sauce:'Peppercorn'},
+    {name:'Sample Guest B', starter:'Burrata', mainType:'main', main:'10oz Ribeye Steak', dessert:'Lemon Tiramisu', notes:'', cook:'Medium rare', side1:'Chunky Chips', side2:'Onion Rings', sauces:'Peppercorn'},
     {name:'Sample Guest C', starter:NONE.starter, mainType:'starter', main:'Deep Fried Brie', dessert:'Artisan Cheeseboard', notes:'No nuts please'},
-    {name:'Sample Guest D', starter:'Soup of the Day (Saver)', mainType:'main', main:'8oz Bistro Rump Steak (Saver)', cook:'Medium', dessert:'Selection of Ice Creams (Saver)', notes:''},
-    {name:'Sample Guest E', starter:'Garlic Bread with Mozzarella', starterReq:'No mozzarella', mainType:'main', main:'Margherita Pizza', dessert:'Knickerbocker Glory', notes:'Gluten free base'}
+    {name:'Sample Guest D', starter:'Soup of the Day', mainType:'main', main:'8oz Bistro Rump Steak with mushroom, tomato & chips', cook:'Medium', dessert:'Sticky Toffee Pudding', notes:''},
+    {name:'Sample Guest E', starter:'Garlic Bread with Mozzarella', starterReq:'No mozzarella', mainType:'main', main:'Margherita Pizza', extraSides:'Chunky Chips', dessert:'Knickerbocker Glory', notes:'Gluten free base'}
   ].map(r => Object.assign({email:'sample@example.com', updated:''}, r));
 }
 async function loadAdmin(key){
@@ -792,31 +847,36 @@ function tally(list){
   const m = new Map(); list.forEach(v => m.set(v, (m.get(v) || 0) + 1));
   return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
-function dishCell(v, sub, req){
+/* kitchen name for a dish: shared dishes say which menu's version it is */
+function kitchenName(n, x, asMain){
+  const d = dishOf(n); if (!d) return n;
+  return d.name + (asMain ? ' (starter as main)' : '') + (d.v.length > 1 && x ? ' (' + SRC_NAME[x.src] + ')' : '');
+}
+function dishCell(v, x, subs, req){
   if (!isReal(v)) return '<span class="sam">' + esc(v || '') + '</span>';
-  const d = byName[v];
-  const tg = d && d.src !== 'cf' ? '<span class="tg mm">' + SRC_NAME[d.src] + '</span>' : '';
-  return esc(d ? d.name : v) + tg + (sub ? '<div class="sam">' + esc(sub) + '</div>' : '') + (req ? '<div class="rqp">Request: ' + esc(req) + '</div>' : '');
+  const d = dishOf(v);
+  const tg = x && x.src !== 'cf' ? '<span class="tg mm">' + SRC_NAME[x.src] + '</span>' : '';
+  return esc(d ? d.name : v) + tg + subs.filter(Boolean).map(s => '<div class="sam">' + esc(s) + '</div>').join('')
+    + (req ? '<div class="rqp">Request: ' + esc(req) + '</div>' : '');
 }
 function renderSheet(isSample){
   const rows = ADMIN_ROWS;
-  const withReq = (list, dish, req) => { const m = {}; list.forEach(r => { if (req(r)) m[dish(r)] = (m[dish(r)] || 0) + 1; }); return m; };
-  const mainKey = r => r.mainType === 'starter' ? r.main + ' (starter as main)' : r.main;
-  const starters = tally(rows.map(r => r.starter).filter(isReal));
-  const mains = tally(rows.filter(r => isReal(r.main)).map(mainKey));
-  const desserts = tally(rows.map(r => r.dessert).filter(isReal));
-  const rqS = withReq(rows.filter(r => isReal(r.starter)), r => r.starter, r => r.starterReq);
-  const rqM = withReq(rows.filter(r => isReal(r.main)), mainKey, r => r.mainReq);
-  const rqD = withReq(rows.filter(r => isReal(r.dessert)), r => r.dessert, r => r.dessertReq);
-  const steaks = rows.filter(isSteak);
-  const sides = tally([].concat(...steaks.map(r => [r.side1, r.side2, r.extraSide].filter(v => v && v !== NO_EXTRA))));
-  const sauces = tally(steaks.map(r => r.sauce).filter(v => v && v !== NO_SAUCE));
-  const prices = rows.map(r => { const p = priceOf(r); return p ? p.total : 0; });
-  const grand = prices.reduce((a, b) => a + b, 0);
-  const fayreCount = rows.filter(r => [r.starter, r.main, r.dessert].some(n => byName[n] && byName[n].src === 'cf')).length;
+  const priced = rows.map(r => priceOf(r));
+  const ch = (i, k) => priced[i] && priced[i].chosen[k];
+  const starters = tally(rows.map((r, i) => isReal(r.starter) && dishOf(r.starter) ? kitchenName(r.starter, ch(i, 'starter')) : null).filter(Boolean));
+  const mains = tally(rows.map((r, i) => r.mainType !== 'none' && isReal(r.main) && dishOf(r.main) ? kitchenName(r.main, ch(i, 'main'), r.mainType === 'starter') : null).filter(Boolean));
+  const desserts = tally(rows.map((r, i) => isReal(r.dessert) && dishOf(r.dessert) ? kitchenName(r.dessert, ch(i, 'dessert')) : null).filter(Boolean));
+  const reqCount = (k, rq) => { const m = {}; rows.forEach((r, i) => { if (r[rq] && isReal(r[k]) && dishOf(r[k])) { const key = kitchenName(r[k], ch(i, k), k === 'main' && r.mainType === 'starter'); m[key] = (m[key] || 0) + 1; } }); return m; };
+  const rqS = reqCount('starter', 'starterReq'), rqM = reqCount('main', 'mainReq'), rqD = reqCount('dessert', 'dessertReq');
+  const sides = tally([].concat(...rows.map(r => (isSteak(r) ? [r.side1, r.side2] : []).concat(extrasOf(r).sides).filter(Boolean))));
+  const sauces = tally([].concat(...rows.map(r => extrasOf(r).sauces)));
+  const totals = priced.map(p => p ? p.total : 0);
+  const grand = totals.reduce((a, b) => a + b, 0);
+  const fayreCount = priced.filter(p => p && Object.values(p.chosen).some(x => x.src === 'cf')).length;
   const remaining = CONFIG.PARTY_SIZE - rows.length;
   const li = (arr, rq) => arr.length ? arr.map(([k, n]) => '<li><span>' + esc(k) +
     (rq && rq[k] ? ' <span class="rqp">(' + rq[k] + ' with a request)</span>' : '') + '</span><b>× ' + n + '</b></li>').join('') : '<li><span>None</span></li>';
+  const extrasLine = r => { const ex = extrasOf(r); return [ex.sides.length ? 'Extra sides: ' + ex.sides.join(', ') : '', ex.sauces.length ? 'Sauces: ' + ex.sauces.join(', ') : ''].filter(Boolean).join(' · '); };
 
   $('sheet').innerHTML =
     '<h1>' + esc(CONFIG.EVENT) + ' · Pre-order</h1>' +
@@ -824,14 +884,18 @@ function renderSheet(isSample){
       ' · ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + ' received' +
       (isSample ? ' · <b style="color:#a51f2b">SAMPLE DATA (preview)</b>' : '') + '</p>' +
     '<table><thead><tr><th>#</th><th>Name</th><th>Starter</th><th>Main</th><th>Dessert</th><th>Allergies / notes</th><th class="p">Price</th></tr></thead><tbody>' +
-    (rows.length ? rows.map((r, i) =>
-      '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td>' +
-      '<td>' + dishCell(r.starter, '', r.starterReq) + '</td>' +
-      '<td>' + dishCell(r.main, r.mainType === 'starter' ? 'starter as main' : steakText(r), r.mainReq) + '</td>' +
-      '<td>' + dishCell(r.dessert, '', r.dessertReq) + '</td>' +
-      '<td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
-      '<td class="p">' + (prices[i] ? money(prices[i]) : '') + '</td></tr>').join('')
-      : '<tr><td colspan="7">No orders yet.</td></tr>') +
+    (rows.length ? rows.map((r, i) => {
+      const xl = extrasLine(r);
+      const mainCell = r.mainType === 'none' || !isReal(r.main)
+        ? '<span class="sam">' + esc(NONE.main) + '</span>' + (xl ? '<div class="sam">' + esc(xl) + '</div>' : '')
+        : dishCell(r.main, ch(i, 'main'), [r.mainType === 'starter' ? 'starter as main' : steakText(r), xl], r.mainReq);
+      return '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td>' +
+        '<td>' + dishCell(r.starter, ch(i, 'starter'), [], r.starterReq) + '</td>' +
+        '<td>' + mainCell + '</td>' +
+        '<td>' + dishCell(r.dessert, ch(i, 'dessert'), [], r.dessertReq) + '</td>' +
+        '<td>' + (r.notes ? '<span class="alg">' + esc(r.notes) + '</span>' : '') + '</td>' +
+        '<td class="p">' + (totals[i] ? money(totals[i]) : '') + '</td></tr>';
+    }).join('') : '<tr><td colspan="7">No orders yet.</td></tr>') +
     '</tbody>' + (rows.length ? '<tfoot><tr><td colspan="6">Total for ' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</td><td class="p">' + money(grand) + '</td></tr></tfoot>' : '') +
     '</table>' +
     '<div class="totals">' +
@@ -839,18 +903,19 @@ function renderSheet(isSample){
       '<div><h3>Mains</h3><ul>' + li(mains, rqM) + '</ul></div>' +
       '<div><h3>Desserts</h3><ul>' + li(desserts, rqD) + '</ul></div>' +
     '</div>' +
-    (steaks.length ? '<p class="extra"><b>Steak sides:</b> ' + sides.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') +
+    (sides.length || sauces.length ? '<p class="extra"><b>Sides:</b> ' + (sides.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') || 'none') +
       (sauces.length ? ' &nbsp; <b>Sauces:</b> ' + sauces.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') : '') + '</p>' : '') +
-    '<p class="extra">Dishes marked <span class="tg mm">Main menu</span> <span class="tg mm">Saver menu</span> or <span class="tg mm">Lunch menu</span> are from that menu. Everything else is Christmas Fayre. ' +
+    '<p class="extra">Dishes marked <span class="tg mm">Main menu</span> <span class="tg mm">Saver menu</span> or <span class="tg mm">Lunch menu</span> are counted against that menu. Everything else is Christmas Fayre. ' +
       '<b>Christmas Fayre:</b> ' + fayreCount + ' of ' + rows.length + ' people have at least one Fayre course.</p>' +
     (remaining > 0 ? '<p class="missing no-print">' + remaining + ' of ' + CONFIG.PARTY_SIZE + ' still to order.</p>' : '');
 }
 function downloadCsv(){
-  const head = ['Name', 'Email', 'Starter', 'Starter request', 'Main', 'Starter as main?', 'Steak details', 'Main request', 'Dessert', 'Dessert request', 'Allergies / notes', 'Price', 'Last updated'];
+  const head = ['Name', 'Email', 'Starter', 'Starter request', 'Main', 'Starter as main?', 'Steak details', 'Main request', 'Extra sides', 'Sauces', 'Dessert', 'Dessert request', 'Allergies / notes', 'Price', 'Last updated'];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   const lines = [head.map(q).join(',')].concat(ADMIN_ROWS.map(r => {
-    const p = priceOf(r);
-    return [r.name, r.email, r.starter, r.starterReq, r.main, r.mainType === 'starter' ? 'Yes' : '', steakText(r), r.mainReq, r.dessert, r.dessertReq, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
+    const p = priceOf(r), ex = extrasOf(r);
+    return [r.name, r.email, r.starter, r.starterReq, r.main, r.mainType === 'starter' ? 'Yes' : '', steakText(r), r.mainReq,
+      ex.sides.join(', '), ex.sauces.join(', '), r.dessert, r.dessertReq, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
   }));
   const blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'christmas-eve-orders.csv';
