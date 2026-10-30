@@ -127,6 +127,8 @@
   .bill:empty{display:none}
   .pnote{margin:12px 0 0;padding:10px 12px;border-radius:9px;background:#fff7e0;border:1px solid #e7cf86;color:#5e4a10;font-size:14px;line-height:1.45}
   .pnote:empty{display:none}
+  .nstat{margin:8px 0 0;font-size:14px;color:var(--muted)}
+  .nstat.loaded{padding:10px 12px;border-radius:9px;background:#e6f0e8;border:1px solid #9fc2aa;color:#173d2e}
   .bill div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
   .bill .total{margin-top:6px;padding-top:8px;border-top:1px solid #cdbf9e;font-family:var(--display);font-size:22px;font-weight:700;color:var(--pine)}
   button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:12px;padding:14px 18px;min-height:54px;width:100%;
@@ -227,9 +229,10 @@
       <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
 
       <div class="field" id="f-name">
-        <label for="name">Your name</label>
-        <input type="text" id="name" name="name" autocomplete="name" maxlength="80">
-        <div class="error">Please put your name.</div>
+        <label for="name">Who's ordering?</label>
+        <select id="name" name="name"></select>
+        <p class="nstat" id="nameStatus" hidden></p>
+        <div class="error">Please pick your name.</div>
       </div>
 
       <div class="field" id="f-mainType">
@@ -338,7 +341,7 @@
       <h2>Thank you, <span id="doneName"></span></h2>
       <p id="doneMsg"></p>
       <div class="summary"><dl id="doneList"></dl><div class="bill" id="doneBill"></div><p class="pnote" id="doneNote"></p></div>
-      <p>To change it, send it again with the same name and email.</p>
+      <p>To change it, open the link again and pick your name. Your order will load so you can change it.</p>
       <button type="button" class="btn-ghost" id="againBtn">Change my order</button>
     </div>
 
@@ -373,7 +376,8 @@
    ========================================================= */
 const CONFIG = {
   SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwUS44SCN-Toj6OXsVWe3MUc-dPOw905pE6YJq2veUZwV2UM3e7Ip_0jKrQEDuulqDq/exec',
-  PARTY_SIZE: 19,
+  GUESTS: ['Scott', 'Vickie', 'Izzie', 'Joe', 'Nat', 'Claire', 'Dave B', 'Josh', 'Olivia', 'Dave E',
+           'Maureen', 'Sean', 'Derek', 'Jenny', 'Dave W', 'Jacob', 'Esme', 'Jenna', 'Addy'],
   EVENT: 'Christmas Eve at The Vane Arms',
   WHEN: 'Thursday 24 December 2026',
   ORGANISER: 'Scott Eason'
@@ -514,6 +518,7 @@ const ALIASES = {
   'The Mediterranean Sourdough (Lunch)': 'The Mediterranean Sourdough'
 };
 
+CONFIG.PARTY_SIZE = CONFIG.GUESTS.length;
 const $ = id => document.getElementById(id);
 const LIVE = /^https:\/\/script\.google\.com\//.test(CONFIG.SCRIPT_URL);
 const byName = {};
@@ -734,6 +739,7 @@ async function submit(e){
     }
     if (!res.ok) throw new Error(res.error || 'Something went wrong.');
     try { localStorage.setItem('xmasOrder', JSON.stringify(o)); } catch(_) {}
+    loadedFor = o.name;
     showDone(o, res);
   } catch(err){
     const f = $('formError');
@@ -755,12 +761,15 @@ function showDone(o, res){
   $('doneNote').textContent = priceOf(o) ? PRICE_NOTE : '';
   window.scrollTo({top:0, behavior:'smooth'});
 }
-function restore(){
-  let o; try { o = JSON.parse(localStorage.getItem('xmasOrder') || 'null'); } catch(_) {}
-  if (!o) return;
-  $('name').value = o.name || ''; $('email').value = o.email || ''; $('notes').value = o.notes || '';
+/* put a saved order (from this device or from the Sheet) back into the form */
+function fillForm(o){
+  if (o.email) $('email').value = o.email;
+  $('notes').value = o.notes || '';
+  document.querySelectorAll('input[name=mainType]').forEach(i => { i.checked = false; });
+  ['starter', 'dessert', 'cook', 'side1', 'side2'].forEach(k => { $(k).selectedIndex = 0; });
   const r = document.querySelector('input[name=mainType][value="' + o.mainType + '"]'); if (r) r.checked = true;
   setMainList();
+  if ($('main').options.length) $('main').selectedIndex = 0;
   const setIf = (id, v) => { if (v && [...$(id).options].some(x => x.value === v)) $(id).value = v; };
   const fix = v => { const d = dishOf(v); return d ? d.name : v; };
   ['starter', 'dessert'].forEach(k => { setIf(k, fix(o[k])); showDesc(k); });
@@ -770,12 +779,60 @@ function restore(){
   const ex = extrasOf(o);
   document.querySelectorAll('input[name=xside]').forEach(i => { i.checked = ex.sides.includes(i.value); });
   document.querySelectorAll('input[name=xsauce]').forEach(i => { i.checked = ex.sauces.includes(i.value); });
-  if (ex.sides.length || ex.sauces.length) $('extrasBox').open = true;
+  $('extrasBox').open = !!(ex.sides.length || ex.sauces.length);
+  ['starter', 'main', 'dessert'].forEach(k => showDesc(k));
+}
+function clearFood(){
+  document.querySelectorAll('input[name=mainType]').forEach(i => { i.checked = false; });
+  ['starter', 'dessert', 'cook', 'side1', 'side2'].forEach(k => { $(k).selectedIndex = 0; });
+  setMainList();
+  ['starterReq', 'mainReq', 'dessertReq', 'notes'].forEach(k => { $(k).value = ''; });
+  document.querySelectorAll('#extrasBox input').forEach(i => { i.checked = false; });
+  $('extrasBox').open = false;
+  ['starter', 'main', 'dessert'].forEach(k => showDesc(k));
+}
+function savedLocal(){ try { return JSON.parse(localStorage.getItem('xmasOrder') || 'null'); } catch(_) { return null; } }
+function restore(){
+  const o = savedLocal();
+  if (!o || !CONFIG.GUESTS.includes(o.name)) return;
+  $('name').value = o.name; fillForm(o); loadedFor = o.name;
+}
+function nameStatus(text, cls){ const n = $('nameStatus'); n.textContent = text; n.className = 'nstat' + (cls ? ' ' + cls : ''); n.hidden = !text; }
+let loadedFor = null, loadToken = 0;
+/* picking a name loads that person's saved order, if there is one */
+async function onNamePicked(){
+  const n = $('name').value, token = ++loadToken;
+  setInvalid('f-name', false);
+  if (!n) return;
+  let order = null;
+  if (LIVE){
+    nameStatus('Checking for an order under ' + n + '…');
+    try {
+      const r = await fetch(CONFIG.SCRIPT_URL + '?action=get&name=' + encodeURIComponent(n));
+      const res = await r.json();
+      if (token !== loadToken) return;
+      if (res && res.ok && res.order) order = res.order;
+    } catch(_) { if (token !== loadToken) return; }
+  } else {
+    const local = savedLocal();
+    if (local && local.name === n) order = local;
+  }
+  if (order){
+    fillForm(order); loadedFor = n;
+    nameStatus('Welcome back, ' + n + '. Your order is loaded below. Change anything you like and send it again.', 'loaded');
+  } else {
+    if (loadedFor && loadedFor !== n) clearFood();
+    loadedFor = null;
+    nameStatus('');
+  }
+  renderSummary();
 }
 function initGuest(){
   if (!LIVE) $('demoBanner').hidden = false;
   fillGrouped($('starter'), MENU.starters, 'Choose a starter…', NONE.starter);
   fillGrouped($('dessert'), MENU.desserts, 'Choose a dessert…', NONE.dessert);
+  fillPlain($('name'), CONFIG.GUESTS.slice().sort((a, b) => a.localeCompare(b, 'en-GB')), 'Choose your name…');
+  $('name').addEventListener('change', onNamePicked);
   fillPlain($('cook'), COOK, 'Choose…');
   fillPlain($('side1'), SIDES, 'Choose a side…');
   fillPlain($('side2'), SIDES, 'Choose a side…');
@@ -787,7 +844,7 @@ function initGuest(){
   ['starter', 'main', 'dessert'].forEach(k => $(k).addEventListener('change', () => { showDesc(k); setInvalid('f-' + k, false); setInvalid('f-any', false); renderSummary(); }));
   ['cook', 'side1', 'side2'].forEach(k => $(k).addEventListener('change', () => { setInvalid('f-' + k, false); renderSummary(); }));
   $('extrasBox').addEventListener('change', renderSummary);
-  ['name', 'email'].forEach(k => $(k).addEventListener('input', () => { setInvalid('f-' + k, false); renderSummary(); }));
+  $('email').addEventListener('input', () => { setInvalid('f-email', false); renderSummary(); });
   $('notes').addEventListener('input', renderSummary);
   ['starterReq', 'mainReq', 'dessertReq'].forEach(k => $(k).addEventListener('input', renderSummary));
   $('orderForm').addEventListener('submit', submit);
@@ -795,6 +852,7 @@ function initGuest(){
   document.querySelectorAll('.menu-card').forEach(b => b.addEventListener('click', () => openMenu(b.dataset.menu, b)));
   restore();
   renderSummary();
+  if ($('name').value) onNamePicked();
 }
 
 /* ---------------- menu viewer ---------------- */
@@ -887,7 +945,9 @@ function renderSheet(isSample){
   const spareWho = rows.filter(r => isSteak(r) && [r.side1, r.side2].includes(NO_SIDE)).map(r => r.name);
   const paidWho = rows.filter(r => extrasOf(r).sides.length).map(r => r.name + ' (' + extrasOf(r).sides.join(', ') + ')');
   const fayreCount = priced.filter(p => p && Object.values(p.chosen).some(x => x.src === 'cf')).length;
-  const remaining = CONFIG.PARTY_SIZE - rows.length;
+  const onList = n => CONFIG.GUESTS.some(g => g.toLowerCase() === String(n).trim().toLowerCase());
+  const missing = CONFIG.GUESTS.filter(g => !rows.some(r => String(r.name).trim().toLowerCase() === g.toLowerCase()));
+  const strays = isSample ? [] : rows.filter(r => !onList(r.name)).map(r => r.name);
   const li = (arr, rq) => arr.length ? arr.map(([k, n]) => '<li><span>' + esc(k) +
     (rq && rq[k] ? ' <span class="rqp">(' + rq[k] + ' with a request)</span>' : '') + '</span><b>× ' + n + '</b></li>').join('') : '<li><span>None</span></li>';
   const extrasLine = r => { const ex = extrasOf(r); return [ex.sides.length ? 'Extra sides: ' + ex.sides.join(', ') : '', ex.sauces.length ? 'Sauces: ' + ex.sauces.join(', ') : ''].filter(Boolean).join(' · '); };
@@ -903,7 +963,7 @@ function renderSheet(isSample){
       const mainCell = r.mainType === 'none' || !isReal(r.main)
         ? '<span class="sam">' + esc(NONE.main) + '</span>' + (xl ? '<div class="sam">' + esc(xl) + '</div>' : '')
         : dishCell(r.main, ch(i, 'main'), [r.mainType === 'starter' ? 'starter as main' : steakText(r), xl], r.mainReq);
-      return '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b></td>' +
+      return '<tr><td class="n">' + (i + 1) + '</td><td><b>' + esc(r.name) + '</b>' + (!isSample && !onList(r.name) ? '<div class="rqp">not on the guest list</div>' : '') + '</td>' +
         '<td>' + dishCell(r.starter, ch(i, 'starter'), [], r.starterReq) + '</td>' +
         '<td>' + mainCell + '</td>' +
         '<td>' + dishCell(r.dessert, ch(i, 'dessert'), [], r.dessertReq) + '</td>' +
@@ -927,7 +987,8 @@ function renderSheet(isSample){
       (sauces.length ? ' &nbsp; <b>Sauces:</b> ' + sauces.map(([k, n]) => esc(k) + ' × ' + n).join(' · ') : '') + '</p>' : '') +
     '<p class="extra">Dishes marked <span class="tg mm">Main menu</span> <span class="tg mm">Saver menu</span> or <span class="tg mm">Lunch menu</span> are counted against that menu. Everything else is Christmas Fayre. ' +
       '<b>Christmas Fayre:</b> ' + fayreCount + ' of ' + rows.length + ' people have at least one Fayre course.</p>' +
-    (remaining > 0 ? '<p class="missing no-print">' + remaining + ' of ' + CONFIG.PARTY_SIZE + ' still to order.</p>' : '');
+    (missing.length ? '<p class="missing no-print"><b>Still to order (' + missing.length + ' of ' + CONFIG.PARTY_SIZE + '):</b> ' + esc(missing.join(', ')) + '</p>' : '<p class="extra no-print"><b>Everyone on the guest list has ordered.</b></p>') +
+    (strays.length ? '<p class="missing no-print"><b>Not on the guest list:</b> ' + esc(strays.join(', ')) + '. Probably test orders; delete these rows from the Google Sheet before printing.</p>' : '');
 }
 function downloadCsv(){
   const head = ['Name', 'Email', 'Starter', 'Starter request', 'Main', 'Starter as main?', 'Steak details', 'Main request', 'Extra sides', 'Sauces', 'Dessert', 'Dessert request', 'Allergies / notes', 'Price', 'Last updated'];
