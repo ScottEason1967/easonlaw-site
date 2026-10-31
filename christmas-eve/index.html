@@ -141,6 +141,22 @@
   .formerror.show{display:block}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .card{scroll-margin-top:34px}
+  .vlink-wrap{text-align:center;margin:16px 0 0}
+  .vlink{display:inline-block;padding:10px 18px;border:1px solid rgba(217,180,91,.8);border-radius:999px;color:var(--gold);text-decoration:none;font-weight:600;font-size:15px;background:rgba(0,0,0,.18)}
+  .vlink:hover,.vlink:focus-visible{background:rgba(217,180,91,.15);outline:none}
+  .vlink.dark{color:var(--pine);border-color:var(--gold-2);background:transparent}
+  .view h2{font-family:var(--display);color:var(--berry);margin:0 0 4px;font-size:28px;text-align:center}
+  .vmeta{text-align:center;color:var(--muted);margin:0 0 16px;font-size:15px}
+  .vp{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;background:#fff}
+  .vp h3{font-family:var(--display);font-size:19px;margin:0 0 6px;color:var(--pine)}
+  .vp dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:15px}
+  .vp dt{color:var(--muted)}
+  .vp dd{margin:0}
+  .vmiss{margin:12px 0 0;padding:10px 12px;border-radius:9px;background:#f7f1e2;color:var(--muted);font-size:14.5px}
+  .vload{text-align:center;color:var(--muted)}
+  .vbtns{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap}
+  .vbtns button{width:auto;min-height:44px;padding:10px 18px;font-size:15px}
+  .vback{color:var(--pine);font-weight:600}
   .done h2{font-family:var(--display);color:var(--berry);margin:0 0 8px;font-size:30px;text-align:center}
   .done p{margin:0 0 12px}
   .done .summary{margin-top:12px}
@@ -225,6 +241,20 @@
         <span>Main, Saver &amp; Lunch menus<small>Tap to view</small></span>
       </button>
     </div>
+
+    <p class="vlink-wrap" id="vlinkWrap"><a class="vlink" href="?view=orders">See who's having what</a></p>
+
+    <section class="card view" id="viewAll" hidden>
+      <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
+      <h2>Who's having what</h2>
+      <p class="vmeta" id="viewMeta"></p>
+      <div id="viewList"></div>
+      <p class="vmiss" id="viewMissing" hidden></p>
+      <div class="vbtns">
+        <button type="button" class="btn-ghost" id="viewRefresh">Refresh</button>
+        <a class="vback" href="./">Back to the order page</a>
+      </div>
+    </section>
 
     <form class="card" id="orderForm" novalidate>
       <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
@@ -344,6 +374,7 @@
       <div class="summary"><dl id="doneList"></dl><div class="bill" id="doneBill"></div><p class="pnote" id="doneNote"></p></div>
       <p>To change it, open the link again and pick your name. Your order will load so you can change it.</p>
       <button type="button" class="btn-ghost" id="againBtn">Change my order</button>
+      <p class="vlink-wrap" style="margin:14px 0 0"><a class="vlink dark" href="?view=orders">See who's having what</a></p>
     </div>
 
     <footer>The Vane Arms · The Village Green · Thorpe Thewles</footer>
@@ -856,6 +887,46 @@ function initGuest(){
   if ($('name').value) onNamePicked();
 }
 
+/* ---------------- everyone's orders (look only) ---------------- */
+function viewLines(o){ return summaryLines(o).filter(([k, v]) => v && k !== 'Allergies / dietary needs'); }
+async function loadEveryone(){
+  const names = CONFIG.GUESTS.slice().sort((a, b) => a.localeCompare(b, 'en-GB'));
+  $('viewList').innerHTML = '<p class="vload">Loading everyone\'s orders…</p>';
+  $('viewMeta').textContent = ''; $('viewMissing').hidden = true;
+  let results;
+  if (LIVE){
+    results = await Promise.all(names.map(n => fetch(CONFIG.SCRIPT_URL + '?action=get&name=' + encodeURIComponent(n))
+      .then(r => r.json()).catch(() => null)));
+  } else {
+    const local = savedLocal();
+    results = names.map(n => ({ ok: true, order: local && local.name === n ? local : null }));
+  }
+  if (results.some(r => r && r.ok && !('order' in r))){
+    $('viewList').innerHTML = '<p class="vload">The order list isn\'t switched on yet. Please try again later.</p>';
+    return;
+  }
+  const failed = results.filter(r => !r || !r.ok).length;
+  const ordered = [], waiting = [];
+  names.forEach((n, i) => { const r = results[i]; if (r && r.ok && r.order) ordered.push([n, r.order]); else if (r && r.ok) waiting.push(n); });
+  $('viewMeta').textContent = ordered.length + ' of ' + CONFIG.GUESTS.length + ' have ordered' + (failed ? ' (' + failed + ' couldn\'t be loaded, press Refresh)' : '');
+  $('viewList').innerHTML = ordered.length ? ordered.map(([n, o]) => {
+    const rows = viewLines(o).map(([k, v]) => {
+      const isReq = / request$/.test(k);
+      return '<dt>' + (isReq ? '' : esc(k)) + '</dt><dd>' + (isReq ? '<span class="rq">Request: ' + esc(v) + '</span>' : esc(v)) + '</dd>';
+    }).join('');
+    return '<div class="vp"><h3>' + esc(n) + '</h3><dl>' + rows + '</dl></div>';
+  }).join('') : '<p class="vload">Nobody has ordered yet.</p>';
+  if (waiting.length){ $('viewMissing').hidden = false; $('viewMissing').innerHTML = '<b>Still to order:</b> ' + esc(waiting.join(', ')); }
+}
+function initView(){
+  initGuest();
+  $('orderForm').hidden = true; $('done').hidden = true; $('vlinkWrap').hidden = true;
+  $('viewAll').hidden = false;
+  document.title = "Who's having what · " + CONFIG.EVENT;
+  $('viewRefresh').addEventListener('click', loadEveryone);
+  loadEveryone();
+}
+
 /* ---------------- menu viewer ---------------- */
 let lbReturn = null;
 function openMenu(key, from){
@@ -1055,7 +1126,7 @@ function startSnow(){
 
 const params = new URLSearchParams(location.search);
 if (params.has('admin')) initAdmin(params.get('admin'));
-else { drawLights(); window.addEventListener('resize', drawLights); startSnow(); initGuest(); }
+else { drawLights(); window.addEventListener('resize', drawLights); startSnow(); if (params.has('view')) initView(); else initGuest(); }
 </script>
 </body>
 </html>
