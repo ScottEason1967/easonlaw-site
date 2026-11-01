@@ -415,8 +415,10 @@ const CONFIG = {
   ORGANISER: 'Scott Eason'
 };
 /* Prices in pence.
-   Set menus (Christmas Fayre, Saver): priced by how many courses come from that menu.
-   One course on its own from a set menu is charged at that menu's 2-course price.
+   Set menus (Christmas Fayre, Saver): 2 or 3 courses from the menu are charged at its 2- or 3-course price.
+   One course on its own from a set menu: a main is charged at the 2-course price; a starter or dessert
+   is charged as an extra course (3-course price minus 2-course price). A dish that is also on the
+   main or lunch menu is charged at that price instead when it would be on its own.
    Main menu and lunch menu: each dish at its own price.
    A dish that appears on more than one menu is listed once and counted against
    whichever menu gives the lowest total for that person's whole order. */
@@ -537,7 +539,8 @@ const SIDES = ['Smoked Mac & Cheese', 'Charred Tenderstem Broccoli', 'Green Bean
 const SAUCES = ['Peppercorn', 'Diane', 'Garlic Butter'];
 const NO_SIDE = 'No side';
 const COOK = ['Blue', 'Rare', 'Medium rare', 'Medium', 'Medium well', 'Well done'];
-const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert'};
+const NONE = {starter:'No starter', main:'No main course', dessert:'No dessert / decide on the night'};
+const OLD_NONE = {'No dessert': NONE.dessert};   // wording used by earlier versions
 const SRC_NAME = { cf: 'Christmas Fayre', mm: 'Main menu', sv: 'Saver menu', ln: 'Lunch menu' };
 /* names used by earlier versions of this page */
 const ALIASES = {
@@ -562,7 +565,7 @@ const dishOf = n => n ? (byName[n] || byName[ALIASES[n]] || byName[String(n).rep
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = p => '£' + (p / 100).toFixed(2);
 const short = p => money(p).replace('.00', '');
-const isReal = v => !!v && !Object.values(NONE).includes(v);
+const isReal = v => !!v && !Object.values(NONE).includes(v) && !OLD_NONE[v];
 const listOf = x => Array.isArray(x) ? x.filter(Boolean) : String(x || '').split(', ').map(s => s.trim()).filter(Boolean);
 
 function variantLabel(x){ return x.src === 'cf' ? 'Christmas Fayre' + (x.supp ? ' +' + short(x.supp) : '') : x.src === 'sv' ? 'Saver' : money(x.price); }
@@ -593,11 +596,24 @@ function picksOf(o){
   return [['starter', o.starter], ['main', o.mainType === 'none' ? '' : o.main], ['dessert', o.dessert]]
     .filter(([, n]) => isReal(n) && dishOf(n)).map(([c, n]) => ({course: c, d: dishOf(n)}));
 }
+const COURSE_WORD = {starter: 'starter', main: 'main', dessert: 'dessert'};
+/* a lone set-menu course is only allowed for dishes that have no main/lunch menu price */
+function comboAllowed(combo){
+  return Object.keys(SETS).every(k => {
+    const items = combo.filter(c => c.x.src === k);
+    return items.length !== 1 || !items[0].d.v.some(x => !SETS[x.src]);
+  });
+}
 function costOf(combo){
   const lines = [];
   Object.keys(SETS).forEach(k => {
-    const n = combo.filter(c => c.x.src === k).length, S = SETS[k];
-    if (n) lines.push([n === 1 ? S.label + ', 1 course (charged at the 2-course price)' : S.label + ', ' + n + ' courses', n >= 3 ? S.three : S.two]);
+    const items = combo.filter(c => c.x.src === k), n = items.length, S = SETS[k];
+    if (n >= 2) lines.push([S.label + ', ' + n + ' courses', n >= 3 ? S.three : S.two]);
+    else if (n === 1){
+      const c = items[0];
+      if (c.course === 'main') lines.push([S.label + ', main only (charged at the 2-course price)', S.two]);
+      else lines.push([S.label + ', ' + COURSE_WORD[c.course] + ' only (priced as an extra course)', S.three - S.two]);
+    }
   });
   combo.forEach(c => { if (c.x.supp) lines.push([c.d.short + ' supplement', c.x.supp]); });
   combo.forEach(c => { if (!SETS[c.x.src]) lines.push([c.d.name + (c.x.src === 'ln' ? ' (lunch menu)' : ''), c.x.price]); });
@@ -610,6 +626,7 @@ function priceOf(o){
   let best = null;
   (function walk(i, combo){
     if (i === picks.length){
+      if (!comboAllowed(combo)) return;
       const lines = costOf(combo), total = lines.reduce((a, l) => a + l[1], 0);
       if (!best || total < best.total) best = { lines, total, combo: combo.slice() };
       return;
@@ -717,7 +734,7 @@ function summaryLines(o){
   if (o.mainReq) rows.push(['Main request', o.mainReq]);
   if (ex.sides.length) rows.push(['Extra sides', ex.sides.join(', ')]);
   if (ex.sauces.length) rows.push(['Sauces', ex.sauces.join(', ')]);
-  rows.push(['Dessert', o.dessert]);
+  rows.push(['Dessert', OLD_NONE[o.dessert] || o.dessert]);
   if (o.dessertReq) rows.push(['Dessert request', o.dessertReq]);
   if (o.notes) rows.push(['Allergies / dietary needs', o.notes]);
   return rows;
@@ -805,7 +822,7 @@ function fillForm(o){
   setMainList();
   if ($('main').options.length) $('main').selectedIndex = 0;
   const setIf = (id, v) => { if (v && [...$(id).options].some(x => x.value === v)) $(id).value = v; };
-  const fix = v => { const d = dishOf(v); return d ? d.name : v; };
+  const fix = v => { if (OLD_NONE[v]) return OLD_NONE[v]; const d = dishOf(v); return d ? d.name : v; };
   ['starter', 'dessert'].forEach(k => { setIf(k, fix(o[k])); showDesc(k); });
   ['cook', 'side1', 'side2'].forEach(k => setIf(k, o[k]));
   if (o.main && o.mainType !== 'none') { setIf('main', fix(o.main)); showDesc('main'); }
@@ -991,7 +1008,7 @@ function kitchenName(n, x, asMain){
   return d.name + (asMain ? ' (starter as main)' : '') + (d.v.length > 1 && x ? ' (' + SRC_NAME[x.src] + ')' : '');
 }
 function dishCell(v, x, subs, req){
-  if (!isReal(v)) return '<span class="sam">' + esc(v || '') + '</span>';
+  if (!isReal(v)) return '<span class="sam">' + esc(OLD_NONE[v] || v || '') + '</span>';
   const d = dishOf(v);
   const tg = x && x.src !== 'cf' ? '<span class="tg mm">' + SRC_NAME[x.src] + '</span>' : '';
   return esc(d ? d.name : v) + tg + subs.filter(Boolean).map(s => '<div class="sam">' + esc(s) + '</div>').join('')
@@ -1068,7 +1085,7 @@ function downloadCsv(){
   const lines = [head.map(q).join(',')].concat(ADMIN_ROWS.map(r => {
     const p = priceOf(r), ex = extrasOf(r);
     return [r.name, r.email, r.starter, r.starterReq, r.main, r.mainType === 'starter' ? 'Yes' : '', steakText(r), r.mainReq,
-      ex.sides.join(', '), ex.sauces.join(', '), r.dessert, r.dessertReq, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
+      ex.sides.join(', '), ex.sauces.join(', '), OLD_NONE[r.dessert] || r.dessert, r.dessertReq, r.notes, p ? (p.total / 100).toFixed(2) : '', r.updated].map(q).join(',');
   }));
   const blob = new Blob(['﻿' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'christmas-eve-orders.csv';
