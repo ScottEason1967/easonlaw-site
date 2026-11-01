@@ -256,7 +256,7 @@
       </div>
     </section>
 
-    <form class="card" id="orderForm" novalidate>
+    <form class="card" id="orderForm" novalidate autocomplete="off">
       <svg class="sprig" viewBox="0 0 74 30" aria-hidden="true"><path d="M37 15C30 6 18 4 6 9c5 1 6 4 4 7 4-2 7 0 7 3 3-3 6-3 8 0 1-3 4-4 7-2C30 19 33 17 37 15z" fill="#3f8a5f"/><path d="M37 15c7-9 19-11 31-6-5 1-6 4-4 7-4-2-7 0-7 3-3-3-6-3-8 0-1-3-4-4-7-2 2-3-1-5-5-2z" fill="#2f6b4c"/><circle cx="33" cy="18" r="4" fill="#c42a36"/><circle cx="41" cy="18" r="4" fill="#c42a36"/><circle cx="37" cy="12" r="4" fill="#d6313e"/></svg>
 
       <div class="field" id="f-name">
@@ -650,13 +650,15 @@ function fillChecks(box, name, items){
 }
 const checked = name => [...document.querySelectorAll('input[name=' + name + ']:checked')].map(i => i.value);
 function mainType(){ const r = document.querySelector('input[name=mainType]:checked'); return r ? r.value : ''; }
+/* the main dropdown always starts empty when the main/starter choice changes */
 function setMainList(){
-  const t = mainType(), sel = $('main'), keep = sel.value;
+  const t = mainType(), sel = $('main');
   $('f-main').hidden = !(t === 'main' || t === 'starter');
   if ($('f-main').hidden) $('w-mainReq').hidden = true;
   if (t === 'main'){ $('mainLabel').textContent = 'Main course'; fillGrouped(sel, MENU.mains, 'Choose your main…'); }
-  if (t === 'starter'){ $('mainLabel').textContent = 'Your main (from the starters)'; fillGrouped(sel, MENU.starters, 'Choose a starter as your main…'); }
-  if ([...sel.options].some(o => o.value === keep && keep)) sel.value = keep;
+  else if (t === 'starter'){ $('mainLabel').textContent = 'Your main (from the starters)'; fillGrouped(sel, MENU.starters, 'Choose a starter as your main…'); }
+  else sel.innerHTML = '';
+  $('mainReq').value = '';
   showDesc('main');
 }
 function showDesc(k){
@@ -882,9 +884,7 @@ function initGuest(){
   $('orderForm').addEventListener('submit', submit);
   $('againBtn').addEventListener('click', () => { $('done').hidden = true; $('orderForm').hidden = false; restore(); renderSummary(); $('orderForm').scrollIntoView({behavior:'smooth', block:'start'}); });
   document.querySelectorAll('.menu-card').forEach(b => b.addEventListener('click', () => openMenu(b.dataset.menu, b)));
-  restore();
   renderSummary();
-  if ($('name').value) onNamePicked();
 }
 
 /* ---------------- everyone's orders (look only) ---------------- */
